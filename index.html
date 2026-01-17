@@ -3,135 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memoria Visual - Gestión Clínica</title>
+    <title>Terapia Visual - Memoria Secuencial Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --success: #22c55e; --text: #f8fafc; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow: hidden; }
-        
-        /* Iconos de fondo reforzados */
-        .decor-bg { position: fixed; font-size: 12rem; opacity: 0.08; z-index: -1; user-select: none; pointer-events: none; }
-        
-        /* Pantalla de Identificación */
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --success: #22c55e; --error: #ef4444; --text: #f8fafc; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        .decor-bg { position: fixed; font-size: 12rem; opacity: 0.05; z-index: -1; user-select: none; pointer-events: none; }
         #login-screen { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .input-clinico { padding: 15px; font-size: 1.2rem; border-radius: 10px; border: 2px solid var(--accent); background: #1e293b; color: white; margin-bottom: 20px; text-align: center; width: 280px; }
-
-        /* Botones de acción (grandes y visibles) */
-        .btn { background: var(--accent); color: white; border: none; padding: 18px 35px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1.2rem; transition: 0.3s; margin: 15px; display: inline-block; }
-        .btn:hover { transform: scale(1.05); filter: brightness(1.1); box-shadow: 0 0 20px rgba(56, 189, 248, 0.5); }
-        .btn-next { background: var(--success) !important; display: none; } /* Verde para "Siguiente" */
-
-        /* Cuadrícula */
+        .btn { background: var(--accent); color: white; border: none; padding: 15px 30px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1.1rem; transition: 0.3s; margin: 10px; }
+        .btn:hover { transform: scale(1.05); filter: brightness(1.1); }
+        .btn-next { background: var(--success) !important; display: none; }
+        .btn-admin { background: rgba(255,255,255,0.1); border: 1px solid white; font-size: 0.8rem; padding: 8px 15px; position: absolute; top: 10px; right: 10px; }
         .grid { display: grid; grid-template-columns: repeat(3, 110px); gap: 15px; margin: 20px auto; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); }
         .tile { width: 110px; height: 110px; background: var(--card); border: 2px solid #334155; border-radius: 20px; cursor: pointer; transition: 0.2s; }
         .tile.active { background: var(--accent); border-color: white; box-shadow: 0 0 40px var(--accent); transform: scale(1.1); }
-
-        #game-ui { display: none; text-align: center; margin-top: 20px; }
-        h1 { font-size: 3rem; color: var(--accent); margin: 10px 0; }
+        #admin-panel { display: none; position: fixed; inset: 0; background: #f1f5f9; color: #1e293b; z-index: 2000; padding: 30px; overflow-y: auto; }
+        #game-ui { display: none; text-align: center; margin-top: 50px; }
     </style>
 </head>
 <body>
-
     <div class="decor-bg" style="top: 10%; left: 5%;">👁️</div>
     <div class="decor-bg" style="bottom: 10%; right: 5%;">🧠</div>
+    <button class="btn btn-admin" onclick="abrirAdmin()">Área Profesional</button>
 
     <div id="login-screen">
-        <h2 style="color: var(--accent);">Registro de Terapia</h2>
-        <input type="text" id="nombrePaciente" class="input-clinico" placeholder="Nombre del Paciente">
-        <button class="btn" onclick="entrarAlJuego()">Entrar</button>
+        <h2 style="color: var(--accent);">Registro de Paciente</h2>
+        <input type="text" id="nombrePaciente" class="input-clinico" placeholder="Nombre completo">
+        <button class="btn" onclick="iniciarTerapia()">Entrar a Sesión</button>
     </div>
 
     <div id="game-ui">
         <h1 id="nivel-txt">Nivel 1</h1>
-        <p id="mensaje" style="font-size: 1.2rem; min-height: 1.5em;">Haz clic en el botón para iniciar</p>
-
+        <p id="mensaje">Presiona el botón para comenzar</p>
         <div class="grid">
-            <div class="tile" onclick="hacerClic(0)"></div>
-            <div class="tile" onclick="hacerClic(1)"></div>
-            <div class="tile" onclick="hacerClic(2)"></div>
-            <div class="tile" onclick="hacerClic(3)"></div>
-            <div class="tile" onclick="hacerClic(4)"></div>
-            <div class="tile" onclick="hacerClic(5)"></div>
-            <div class="tile" onclick="hacerClic(6)"></div>
-            <div class="tile" onclick="hacerClic(7)"></div>
-            <div class="tile" onclick="hacerClic(8)"></div>
+            <div class="tile" onclick="registrarClic(0)"></div>
+            <div class="tile" onclick="registrarClic(1)"></div>
+            <div class="tile" onclick="registrarClic(2)"></div>
+            <div class="tile" onclick="registrarClic(3)"></div>
+            <div class="tile" onclick="registrarClic(4)"></div>
+            <div class="tile" onclick="registrarClic(5)"></div>
+            <div class="tile" onclick="registrarClic(6)"></div>
+            <div class="tile" onclick="registrarClic(7)"></div>
+            <div class="tile" onclick="registrarClic(8)"></div>
         </div>
+        <button id="btn-start" class="btn" onclick="iniciarNivel()">INICIAR NIVEL</button>
+        <button id="btn-next" class="btn btn-next" onclick="pasarNivel()">SIGUIENTE NIVEL ➡️</button>
+    </div>
 
-        <div id="area-botones">
-            <button id="btn-start" class="btn" onclick="lanzarSecuencia()">INICIAR NIVEL</button>
-            <button id="btn-next" class="btn btn-next" onclick="irASiguienteNivel()">SIGUIENTE NIVEL ➡️</button>
+    <div id="admin-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>Panel Clínico (Memoria)</h2>
+            <button class="btn" style="background:var(--error)" onclick="cerrarAdmin()">Cerrar</button>
         </div>
+        <canvas id="graficoProgreso"></canvas>
+        <table style="width:100%; margin-top:20px; border-collapse:collapse;" border="1">
+            <thead><tr><th>Fecha</th><th>Paciente</th><th>Nivel Máximo</th></tr></thead>
+            <tbody id="cuerpoTabla"></tbody>
+        </table>
     </div>
 
     <script>
-        let paciente = "", nivel = 1, secuencia = [], clicksUsuario = [], puedeTocar = false;
-        const fichas = document.querySelectorAll('.tile');
+        let paciente = "", nivel = 1, secuencia = [], userSeq = [], interactivo = false;
+        const tiles = document.querySelectorAll('.tile');
+        // Nuevo link de formulario conectado
+        const formURL = "https://docs.google.com/forms/d/e/1FAIpQLScTLPpumt34oTOYtN4zll18UhU7uCWFvix60cSEDTRCPOaaoQ/formResponse";
 
-        function entrarAlJuego() {
+        function iniciarTerapia() {
             paciente = document.getElementById('nombrePaciente').value.trim();
-            if (paciente.length < 2) return alert("Por favor, ingresa el nombre.");
+            if (paciente.length < 3) return alert("Ingrese el nombre del paciente.");
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('game-ui').style.display = 'block';
         }
 
-        async function lanzarSecuencia() {
+        async function iniciarNivel() {
             document.getElementById('btn-start').style.display = 'none';
             document.getElementById('mensaje').innerText = "Memoriza la secuencia...";
-            clicksUsuario = []; secuencia = []; puedeTocar = false;
-            
-            // Generar nivel: Nivel 1 = 3 fichas
-            for(let i=0; i < (nivel + 2); i++) {
-                secuencia.push(Math.floor(Math.random() * 9));
-            }
-
-            // Mostrar secuencia al paciente
+            userSeq = []; secuencia = []; interactivo = false;
+            for(let i=0; i < (nivel + 2); i++) secuencia.push(Math.floor(Math.random() * 9));
             for(let id of secuencia) {
                 await new Promise(r => setTimeout(r, 600));
-                fichas[id].classList.add('active');
+                tiles[id].classList.add('active');
                 await new Promise(r => setTimeout(r, 700));
-                fichas[id].classList.remove('active');
+                tiles[id].classList.remove('active');
             }
-
-            puedeTocar = true;
+            interactivo = true;
             document.getElementById('mensaje').innerText = "¡Tu turno!";
         }
 
-        function hacerClic(id) {
-            if (!puedeTocar) return;
-            
-            fichas[id].classList.add('active');
-            setTimeout(() => fichas[id].classList.remove('active'), 250);
-            clicksUsuario.push(id);
-
-            // Verificar si falló
-            if (clicksUsuario[clicksUsuario.length - 1] !== secuencia[clicksUsuario.length - 1]) {
-                alert("Error en la secuencia. Volviendo al inicio.");
-                resetTerapia();
-                return;
-            }
-
-            // Verificar si completó el nivel
-            if (clicksUsuario.length === secuencia.length) {
-                puedeTocar = false;
+        function registrarClic(id) {
+            if (!interactivo) return;
+            tiles[id].classList.add('active');
+            setTimeout(() => tiles[id].classList.remove('active'), 250);
+            userSeq.push(id);
+            if (userSeq[userSeq.length - 1] !== secuencia[userSeq.length - 1]) {
+                alert("Incorrecto. Guardando resultado...");
+                enviarAGoogle(paciente, nivel);
+                nivel = 1;
+                resetUI();
+            } else if (userSeq.length === secuencia.length) {
+                interactivo = false;
                 document.getElementById('mensaje').innerText = "¡Excelente!";
                 document.getElementById('btn-next').style.display = 'inline-block';
             }
         }
 
-        function irASiguienteNivel() {
+        function pasarNivel() {
             nivel++;
             document.getElementById('nivel-txt').innerText = "Nivel " + nivel;
-            document.getElementById('mensaje').innerText = "Listo para el próximo reto.";
             document.getElementById('btn-next').style.display = 'none';
             document.getElementById('btn-start').style.display = 'inline-block';
         }
 
-        function resetTerapia() {
-            nivel = 1;
+        function resetUI() {
             document.getElementById('nivel-txt').innerText = "Nivel 1";
             document.getElementById('btn-start').style.display = 'inline-block';
             document.getElementById('btn-next').style.display = 'none';
-            document.getElementById('mensaje').innerText = "Toca Iniciar para reintentar.";
         }
+
+        function enviarAGoogle(nom, n) {
+            let historial = JSON.parse(localStorage.getItem('h_memoria') || "[]");
+            historial.push({ nombre: nom, fecha: new Date().toLocaleDateString(), nivel: n });
+            localStorage.setItem('h_memoria', JSON.stringify(historial));
+
+            const formData = new FormData();
+            formData.append("entry.2096898436", nom); // ID Campo Nombre
+            formData.append("entry.441865910", n);     // ID Campo Nivel
+            fetch(formURL, { method: "POST", mode: "no-cors", body: formData });
+        }
+
+        function abrirAdmin() {
+            if (prompt("Clave Profesional:") === "1234") {
+                document.getElementById('admin-panel').style.display = 'block';
+                const datos = JSON.parse(localStorage.getItem('h_memoria') || "[]");
+                document.getElementById('cuerpoTabla').innerHTML = datos.reverse().map(d => `<tr><td>${d.fecha}</td><td>${d.nombre}</td><td>${d.nivel}</td></tr>`).join('');
+            }
+        }
+        function cerrarAdmin() { document.getElementById('admin-panel').style.display = 'none'; }
     </script>
 </body>
 </html>
