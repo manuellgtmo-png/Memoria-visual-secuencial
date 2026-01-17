@@ -2,261 +2,203 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Terapia Visual Pro - Secuencial</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memoria Visual Pro - Gestión Clínica</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #3498db; --success: #27ae60; --error: #e74c3c; --bg: #f0f3f5; --text: #2c3e50; --contrast: 1; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 10px; display: flex; justify-content: center; touch-action: manipulation; }
+        :root { --bg: #1a1a2e; --card: #16213e; --accent: #4ecca3; --error: #e94560; --text: #eeeeee; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        #game-container { 
-            width: 100%; max-width: 600px; background: white; padding: 20px; 
-            border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-            position: relative; overflow: hidden; min-height: 500px;
+        /* Navegación */
+        .header-nav { width: 100%; display: flex; justify-content: flex-end; padding: 10px; gap: 10px; z-index: 10; }
+        .btn-ui { background: rgba(255,255,255,0.1); border: 1px solid white; color: white; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        
+        /* Panel de Configuración */
+        .config-panel { display: none; position: absolute; top: 60px; right: 10px; background: white; color: #333; padding: 15px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 220px; z-index: 20; }
+
+        /* Cuadrícula de Juego */
+        .grid { display: grid; grid-template-columns: repeat(3, 100px); gap: 15px; margin: 30px auto; }
+        .tile { width: 100px; height: 100px; background: var(--card); border: 2px solid #0f3460; border-radius: 15px; cursor: pointer; transition: 0.2s; }
+        .tile.active { background: var(--accent); transform: scale(1.05); box-shadow: 0 0 25px var(--accent); border-color: white; }
+        
+        /* Área Profesional */
+        #admin-section { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f7f6; color: #333; overflow-y: auto; padding: 25px; z-index: 100; box-sizing: border-box; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ddd; margin-bottom: 20px; }
+        .btn-print { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 15px; }
+
+        @media print {
+            .no-print { display: none !important; }
+            #admin-section { position: relative; display: block !important; padding: 0; }
+            body { background: white; }
         }
-
-        /* Pantalla de Introducción */
-        #intro-screen { 
-            position: absolute; top:0; left:0; width:100%; height:100%; 
-            background: white; z-index: 100; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; padding: 30px; 
-            box-sizing: border-box; border-radius: 20px; 
-        }
-        
-        /* Grilla Dinámica */
-        .grid { display: grid; gap: 15px; margin: 20px 0; transition: 0.3s; }
-        .grid-2x2 { grid-template-columns: repeat(2, 1fr); }
-        .grid-3x2 { grid-template-columns: repeat(3, 1fr); }
-        .grid-3x3 { grid-template-columns: repeat(3, 1fr); }
-
-        .shape { 
-            aspect-ratio: 1/1; border-radius: 15px; cursor: pointer; border: 4px solid transparent; 
-            transition: transform 0.1s, opacity 0.1s;
-            filter: saturate(var(--contrast)) brightness(var(--contrast));
-            -webkit-tap-highlight-color: transparent; /* Elimina cuadro azul en móviles */
-        }
-        .active { transform: scale(0.9); border-color: #333 !important; opacity: 0.7; }
-
-        /* Colores y Formas */
-        .circle { background: #ff5f5f; border-radius: 50%; }
-        .square { background: #5fafff; }
-        .triangle { background: #5fff7f; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }
-        .diamond { background: #ffef5f; transform: rotate(45deg) scale(0.8); }
-        .pentagon { background: #a55eea; clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); }
-        .hexagon { background: #fd9644; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); }
-        .star { background: #f7b731; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
-        .cross { background: #eb3b5a; clip-path: polygon(20% 0%, 80% 0%, 80% 20%, 100% 20%, 100% 80%, 80% 80%, 80% 100%, 20% 100%, 20% 80%, 0% 80%, 0% 20%, 20% 20%); }
-        .trapezoid { background: #2bcbba; clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%); }
-
-        .controls-box { background: #f8f9fa; padding: 15px; border-radius: 12px; margin: 15px 0; border: 1px solid #eee; }
-        label { display: block; font-size: 0.85em; font-weight: bold; margin-bottom: 5px; color: #7f8c8d; }
-
-        #pro-section { margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; display: none; text-align: left; }
-        .lock-btn { background: none; border: none; color: #bdc3c7; cursor: pointer; font-size: 0.8em; margin-top: 20px; width: 100%; }
-        
-        button { padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
-        .btn-blue { background: var(--primary); color: white; }
-        .btn-green { background: var(--success); color: white; margin-top: 10px; }
-        
-        #timer-bar { height: 10px; background: var(--error); width: 0%; border-radius: 5px; margin-bottom: 15px; }
-        #msg { font-weight: bold; color: var(--primary); }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <div id="intro-screen">
-        <h2 style="color:var(--primary); margin-bottom: 10px;">¡Hola! Vamos a trabajar...</h2>
-        <p style="text-align: center; line-height: 1.6; font-size: 1.1em; color: #34495e;">
-            Tu memoria y atención visual son la clave hoy. 
-            Observa con cuidado las figuras que se iluminan y trata de recordar su orden exacto. 
-            ¡Cada nivel será un nuevo reto con más figuras! 
-            <br><br><strong>¿Estás listo?</strong>
-        </p>
-        <button class="btn-blue" onclick="closeIntro()">¡Sí, estoy listo!</button>
+    <div class="header-nav no-print">
+        <button class="btn-ui" onclick="toggleConfig()">⚙️ Ajustes</button>
+        <button class="btn-ui" onclick="accesoAdmin()">Área Profesional</button>
     </div>
 
-    <input type="text" id="p-name" placeholder="Nombre del Paciente">
-    
-    <div class="controls-box">
-        <label>Tiempo de memorización: <span id="s-val">1.0s</span></label>
-        <input type="range" id="s-range" min="0.5" max="10" step="0.5" value="1" oninput="updateUI()">
+    <div id="config-panel" class="config-panel">
+        <strong>Velocidad de Estímulo</strong>
+        <hr>
+        <select id="speedMode" style="width: 100%; padding: 5px;">
+            <option value="1000">Lento (Fácil)</option>
+            <option value="600" selected>Normal</option>
+            <option value="300">Rápido (Avanzado)</option>
+        </select>
+        <p style="font-size: 0.8rem; color: #666; margin-top: 10px;">Ajusta el tiempo que la ficha permanece encendida.</p>
+    </div>
+
+    <div id="game-container" style="text-align: center; margin-top: 20px;">
+        <h1 id="nivel-display" style="color: var(--accent);">Nivel 1</h1>
+        <p id="mensaje">Haz clic en Iniciar para comenzar</p>
         
-        <label style="margin-top:10px;">Nivel de Contraste: <span id="c-val">100%</span></label>
-        <input type="range" id="c-range" min="0.2" max="1" step="0.1" value="1" oninput="updateUI()">
+        <div class="grid" id="grid">
+            <div class="tile" onclick="registrarClic(0)"></div>
+            <div class="tile" onclick="registrarClic(1)"></div>
+            <div class="tile" onclick="registrarClic(2)"></div>
+            <div class="tile" onclick="registrarClic(3)"></div>
+            <div class="tile" onclick="registrarClic(4)"></div>
+            <div class="tile" onclick="registrarClic(5)"></div>
+            <div class="tile" onclick="registrarClic(6)"></div>
+            <div class="tile" onclick="registrarClic(7)"></div>
+            <div class="tile" onclick="registrarClic(8)"></div>
+        </div>
+
+        <button id="btn-start" class="btn-ui" style="background: var(--accent); font-size: 1.2rem; padding: 10px 30px;" onclick="iniciarNivel()">Iniciar Entrenamiento</button>
     </div>
 
-    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span style="font-size: 1.2em; font-weight: bold;">Nivel: <span id="lv">1</span></span>
-        <span id="msg">¡Bienvenido!</span>
+    <div id="admin-section">
+        <div class="admin-header">
+            <h2>Gestión de Pacientes - Memoria Visual</h2>
+            <button class="btn-ui" style="background:var(--error); border:none;" onclick="cerrarAdmin()">Cerrar</button>
+        </div>
+        
+        <select id="pacienteSelect" onchange="verProgreso()" style="width: 100%; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+            <option value="">-- Seleccionar Paciente --</option>
+        </select>
+
+        <div id="datosView" style="display:none;">
+            <button class="btn-print no-print" onclick="window.print()">🖨️ Generar Reporte PDF</button>
+            <h3>Progreso de: <span id="nombrePacienteDoc"></span></h3>
+            <div style="max-width: 700px; margin: 20px auto;"><canvas id="chartMemoria"></canvas></div>
+            <table style="width: 100%; border-collapse: collapse; background: white;">
+                <thead><tr style="background:#3498db; color:white;"><th>Fecha</th><th>Nivel Alcanzado (Fichas)</th></tr></thead>
+                <tbody id="tablaCuerpo"></tbody>
+            </table>
+        </div>
     </div>
 
-    <div id="timer-bar"></div>
-    <div id="game-grid" class="grid grid-2x2"></div>
+    <script>
+        let secuencia = [], userSeq = [], nivel = 1, interactivo = false, chart;
+        const tiles = document.querySelectorAll('.tile');
 
-    <button id="start-btn" class="btn-blue" onclick="init()">Iniciar Entrenamiento</button>
-    <button id="next-btn" class="btn-green" style="display:none" onclick="playLevel()">Siguiente Nivel ➔</button>
+        function toggleConfig() {
+            let p = document.getElementById('config-panel');
+            p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        }
 
-    <button class="lock-btn" onclick="unlockPro()">🔓 Acceso Profesional</button>
-    
-    <div id="pro-section">
-        <h3>Historial Clínico</h3>
-        <input type="text" id="search" placeholder="Buscar paciente..." oninput="drawAll()">
-        <div style="height:220px;"><canvas id="myChart"></canvas></div>
-        <table style="width:100%; border-collapse: collapse; margin-top:15px; font-size:0.85em;">
-            <thead style="background:#eee;"><tr><th>Fecha</th><th>Paciente</th><th>Nivel</th></tr></thead>
-            <tbody id="h-body"></tbody>
-        </table>
-        <button onclick="downloadCSV()" style="font-size:11px; margin-top:15px; background:#95a5a6; color:white;">Descargar Excel</button>
-    </div>
-</div>
-
-<script>
-    let seq = [], uSeq = [], lv = 1, can = false, chart;
-    const allShapes = ['circle', 'square', 'triangle', 'diamond', 'pentagon', 'hexagon', 'star', 'cross', 'trapezoid'];
-    const pass = "1234";
-
-    function closeIntro() { document.getElementById('intro-screen').style.display = 'none'; }
-
-    function updateUI() {
-        document.getElementById('s-val').innerText = document.getElementById('s-range').value + "s";
-        const c = document.getElementById('c-range').value;
-        document.getElementById('c-val').innerText = (c*100).toFixed(0) + "%";
-        document.documentElement.style.setProperty('--contrast', c);
-    }
-
-    function renderGrid() {
-        const g = document.getElementById('game-grid');
-        g.innerHTML = "";
-        let count = (lv >= 11) ? 9 : (lv >= 6 ? 6 : 4);
-        g.className = "grid " + (lv >= 11 ? "grid-3x3" : (lv >= 6 ? "grid-3x2" : "grid-2x2"));
-
-        for(let i=0; i<count; i++) {
-            const d = document.createElement('div');
-            const shapeId = allShapes[i];
-            d.className = `shape ${shapeId}`;
-            d.id = shapeId;
+        function iniciarNivel() {
+            userSeq = []; secuencia = []; interactivo = false;
+            document.getElementById('btn-start').style.display = 'none';
+            document.getElementById('mensaje').innerText = "Memoriza la secuencia...";
             
-            // SOPORTE TOUCH Y MOUSE
-            const handleAction = (e) => {
-                e.preventDefault();
-                handleUser(shapeId);
-            };
-            d.addEventListener('touchstart', handleAction, {passive: false});
-            d.addEventListener('mousedown', (e) => {
-                if ('ontouchstart' in window) return; // Evita doble disparo en móviles
-                handleUser(shapeId);
+            // La secuencia aumenta con el nivel: Nivel 1 = 3 fichas, Nivel 2 = 4 fichas...
+            for(let i=0; i < (nivel + 2); i++) secuencia.push(Math.floor(Math.random() * 9));
+            mostrarSecuencia();
+        }
+
+        async function mostrarSecuencia() {
+            let velocidad = parseInt(document.getElementById('speedMode').value);
+            for(let id of secuencia) {
+                await new Promise(r => setTimeout(r, 400));
+                tiles[id].classList.add('active');
+                await new Promise(r => setTimeout(r, velocidad));
+                tiles[id].classList.remove('active');
+            }
+            interactivo = true;
+            document.getElementById('mensaje').innerText = "¡Tu turno!";
+        }
+
+        function registrarClic(id) {
+            if(!interactivo) return;
+            tiles[id].classList.add('active');
+            setTimeout(() => tiles[id].classList.remove('active'), 200);
+            userSeq.push(id);
+
+            if(userSeq[userSeq.length-1] !== secuencia[userSeq.length-1]) {
+                finalizar(false);
+            } else if(userSeq.length === secuencia.length) {
+                finalizar(true);
+            }
+        }
+
+        function finalizar(exito) {
+            interactivo = false;
+            if(exito) {
+                nivel++;
+                document.getElementById('nivel-display').innerText = "Nivel " + nivel;
+                document.getElementById('mensaje').innerText = "¡Correcto! Siguiente nivel...";
+                setTimeout(iniciarNivel, 1200);
+            } else {
+                guardarDatos(nivel);
+                document.getElementById('mensaje').innerText = "Secuencia incorrecta.";
+                document.getElementById('btn-start').innerText = "Reiniciar Entrenamiento";
+                document.getElementById('btn-start').style.display = 'inline-block';
+                nivel = 1;
+                document.getElementById('nivel-display').innerText = "Nivel 1";
+            }
+        }
+
+        function guardarDatos(lv) {
+            let nombre = prompt("Nombre del Paciente para el registro:") || "Anónimo";
+            let db = JSON.parse(localStorage.getItem('db_memoria_v2') || "[]");
+            db.push({
+                nombre: nombre.trim().toUpperCase(),
+                fecha: new Date().toLocaleDateString(),
+                nivel: lv + 2 // Guardamos el número total de fichas recordadas
             });
+            localStorage.setItem('db_memoria_v2', JSON.stringify(db));
+        }
+
+        function accesoAdmin() {
+            if(prompt("Clave Profesional:") === "1234") {
+                document.getElementById('admin-section').style.display = 'block';
+                poblarPacientes();
+            }
+        }
+
+        function poblarPacientes() {
+            let db = JSON.parse(localStorage.getItem('db_memoria_v2') || "[]");
+            let nombres = [...new Set(db.map(r => r.nombre))];
+            let sel = document.getElementById('pacienteSelect');
+            sel.innerHTML = '<option value="">-- Seleccionar Paciente --</option>' + 
+                            nombres.map(n => `<option value="${n}">${n}</option>`).join('');
+        }
+
+        function verProgreso() {
+            let n = document.getElementById('pacienteSelect').value;
+            if(!n) return;
+            document.getElementById('datosView').style.display = 'block';
+            document.getElementById('nombrePacienteDoc').innerText = n;
+            let filtrados = JSON.parse(localStorage.getItem('db_memoria_v2')).filter(r => r.nombre === n);
             
-            g.appendChild(d);
+            document.getElementById('tablaCuerpo').innerHTML = filtrados.reverse().map(r => 
+                `<tr><td style="border:1px solid #ddd;padding:10px">${r.fecha}</td><td style="border:1px solid #ddd;padding:10px">${r.nivel} elementos</td></tr>`).join('');
+
+            if(chart) chart.destroy();
+            chart = new Chart(document.getElementById('chartMemoria'), {
+                type: 'line',
+                data: {
+                    labels: filtrados.map(r => r.fecha).reverse(),
+                    datasets: [{ label: 'Fichas Alcanzadas', data: filtrados.map(r => r.nivel).reverse(), borderColor: '#4ecca3', fill: false }]
+                }
+            });
         }
-    }
-
-    function init() {
-        if(!document.getElementById('p-name').value) return alert("Nombre requerido");
-        lv = 1; seq = [];
-        document.getElementById('start-btn').style.display = 'none';
-        playLevel();
-    }
-
-    async function playLevel() {
-        uSeq = []; can = false;
-        document.getElementById('next-btn').style.display = 'none';
-        document.getElementById('lv').innerText = lv;
-        renderGrid();
-        const visibleCount = (lv >= 11) ? 9 : (lv >= 6 ? 6 : 4);
-        seq.push(allShapes[Math.floor(Math.random() * visibleCount)]);
-        await new Promise(r => setTimeout(r, 600));
-        const speed = document.getElementById('s-range').value * 1000;
-        for(let s of seq) {
-            document.getElementById('msg').innerText = "Memoriza...";
-            await flash(s, speed);
-        }
-        document.getElementById('msg').innerText = "¡Tu turno!";
-        can = true;
-    }
-
-    function flash(id, ms) {
-        return new Promise(r => {
-            const el = document.getElementById(id);
-            const bar = document.getElementById('timer-bar');
-            bar.style.transition = 'none'; bar.style.width = '100%';
-            void bar.offsetWidth;
-            el.classList.add('active');
-            bar.style.transition = `width ${ms}ms linear`; bar.style.width = '0%';
-            setTimeout(() => { el.classList.remove('active'); setTimeout(r, 250); }, ms);
-        });
-    }
-
-    function handleUser(id) {
-        if(!can) return;
-        uSeq.push(id);
-        const el = document.getElementById(id);
-        el.classList.add('active'); 
-        setTimeout(() => el.classList.remove('active'), 100);
-
-        if(uSeq[uSeq.length-1] !== seq[uSeq.length-1]) {
-            save();
-            document.getElementById('msg').innerText = "¡Error!";
-            alert("Nivel final: " + (lv-1));
-            lv = 1; seq = [];
-            document.getElementById('start-btn').style.display = 'block';
-            document.getElementById('start-btn').innerText = "Reintentar";
-            can = false;
-            return;
-        }
-        if(uSeq.length === seq.length) {
-            document.getElementById('msg').innerText = "¡Muy bien!";
-            lv++; can = false;
-            document.getElementById('next-btn').style.display = 'block';
-        }
-    }
-
-    function save() {
-        const rec = { n: document.getElementById('p-name').value, d: new Date().toLocaleString(), l: lv-1 };
-        let h = JSON.parse(localStorage.getItem('h')) || [];
-        h.unshift(rec);
-        localStorage.setItem('h', JSON.stringify(h));
-        drawAll();
-    }
-
-    function unlockPro() {
-        if(prompt("Clave:") === pass) {
-            document.getElementById('pro-section').style.display = 'block';
-            drawAll();
-        }
-    }
-
-    function drawAll() {
-        const h = JSON.parse(localStorage.getItem('h')) || [];
-        const f = document.getElementById('search').value.toLowerCase();
-        const filtered = h.filter(x => x.n.toLowerCase().includes(f));
-        const b = document.getElementById('h-body');
-        b.innerHTML = "";
-        filtered.slice(0,10).forEach(x => {
-            b.innerHTML += `<tr style="border-bottom:1px solid #eee"><td>${x.d.split(' ')[0]}</td><td>${x.n}</td><td>${x.l}</td></tr>`;
-        });
-        const chartData = [...filtered].reverse();
-        if(chart) chart.destroy();
-        chart = new Chart(document.getElementById('myChart'), {
-            type: 'line',
-            data: {
-                labels: chartData.map(x => x.d.split(' ')[0]),
-                datasets: [{ label: 'Nivel', data: chartData.map(x => x.l), borderColor: '#3498db', fill: true, tension: 0.3 }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
-    }
-
-    function downloadCSV() {
-        const h = JSON.parse(localStorage.getItem('h')) || [];
-        let csv = "Fecha,Paciente,Nivel\n" + h.map(x => `${x.d},${x.n},${x.l}`).join("\n");
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = "terapia.csv";
-        a.click();
-    }
-</script>
+        function cerrarAdmin() { document.getElementById('admin-section').style.display = 'none'; }
+    </script>
 </body>
 </html>
+
