@@ -3,93 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memoria Secuencial</title>
+    <title>Memoria Clínica Pro - Niños</title>
     <style>
-        :root { --bg: #0f172a; --accent: #38bdf8; --card-bg: #1e293b; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; }
-        #setup-screen, #instruction-screen { position: fixed; inset: 0; background: var(--bg); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .btn-grande { background: var(--accent); color: #0f172a; padding: 15px 35px; border-radius: 12px; font-weight: bold; cursor: pointer; border: none; margin-top: 20px; }
-        #game-container { display: grid; grid-template-columns: repeat(3, 100px); gap: 15px; margin-top: 50px; }
-        .panel { width: 100px; height: 100px; background: var(--card-bg); border-radius: 12px; cursor: pointer; }
-        .active { background: white !important; box-shadow: 0 0 20px white; }
-        .error { background: #ef4444 !important; }
+        :root { --bg: #0f172a; --accent: #38bdf8; --card: #1e293b; --error: #f43f5e; --success: #10b981; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
+        
+        #setup-screen, #instruction-screen, #msg-screen, #next-level-screen { 
+            position: fixed; inset: 0; background: var(--bg); z-index: 2000; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            padding: 20px; text-align: center; 
+        }
+
+        .btn-grande { background: var(--accent); color: #0f172a; padding: 18px 45px; border-radius: 15px; font-size: 1.5rem; font-weight: bold; cursor: pointer; border: none; margin-top: 25px; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4); transition: 0.3s; }
+        .btn-grande:hover { transform: translateY(-3px); filter: brightness(1.1); }
+        
+        .grid { display: grid; grid-template-columns: repeat(3, 110px); gap: 15px; margin-top: 30px; }
+        .tile { width: 110px; height: 110px; background: var(--card); border: 3px solid #334155; border-radius: 20px; cursor: pointer; transition: 0.2s; }
+        
+        .tile.active { background: #fff !important; transform: scale(0.95); box-shadow: 0 0 30px #fff; }
+        .tile.correct { background: var(--success) !important; border-color: white; box-shadow: 0 0 20px var(--success); }
+        .tile.wrong { background: var(--error) !important; border-color: white; box-shadow: 0 0 20px var(--error); }
+
+        .header-clinico { width: 100%; background: rgba(30, 41, 59, 0.9); padding: 15px; border-bottom: 3px solid var(--accent); display: flex; justify-content: space-around; font-weight: bold; }
+        .stat-val { color: var(--accent); font-size: 1.3rem; display: block; }
     </style>
 </head>
 <body>
+
     <div id="setup-screen">
-        <h1 style="color:var(--accent)">MEMORIA SECUENCIAL</h1>
-        <input type="text" id="nombrePaciente" style="padding:12px; border-radius:8px;" placeholder="Nombre del Paciente">
-        <button class="btn-grande" onclick="irAInstrucciones()">Siguiente</button>
+        <h1 style="color:var(--accent); font-size: 2.5rem;">MEMORIA VISUAL</h1>
+        <input type="text" id="nombrePaciente" style="padding:15px; border-radius:12px; border:2px solid var(--accent); background:var(--card); color:white; width:300px;" placeholder="Nombre del Paciente">
+        <button class="btn-grande" onclick="mostrarInstrucciones()">Continuar</button>
     </div>
+
     <div id="instruction-screen" style="display:none">
-        <h2>Instrucciones</h2>
-        <p>Repite la secuencia de luces.<br>El juego termina al fallar.</p>
+        <h1 style="font-size: 3rem;">🌟 ¡Hola! 🌟</h1>
+        <p style="max-width: 500px; font-size: 1.3rem; line-height: 1.6;">
+            Mira con mucha atención los cuadros que se iluminan.<br><br>
+            ¡Tu misión es <b>repetir el mismo orden</b>!<br>
+            Tienes 2 vidas por nivel. ¡Mucha suerte!
+        </p>
         <button class="btn-grande" onclick="comenzarJuego()">¡Empezar!</button>
     </div>
-    <div style="padding:20px;">Paciente: <b id="val-pac">---</b> | Nivel: <b id="val-level">1</b></div>
-    <div id="game-container">
-        <div class="panel" onclick="panelClick(1)" data-id="1"></div><div class="panel" onclick="panelClick(2)" data-id="2"></div><div class="panel" onclick="panelClick(3)" data-id="3"></div>
-        <div class="panel" onclick="panelClick(4)" data-id="4"></div><div class="panel" onclick="panelClick(5)" data-id="5"></div><div class="panel" onclick="panelClick(6)" data-id="6"></div>
-        <div class="panel" onclick="panelClick(7)" data-id="7"></div><div class="panel" onclick="panelClick(8)" data-id="8"></div><div class="panel" onclick="panelClick(9)" data-id="9"></div>
+
+    <div id="next-level-screen" style="display:none">
+        <h2 style="color:var(--success); font-size: 2.5rem;">¡Nivel Completado!</h2>
+        <p id="stats-nivel" style="font-size: 1.2rem;"></p>
+        <button class="btn-grande" onclick="prepararSiguienteRonda()">Siguiente Nivel ➔</button>
+    </div>
+
+    <div id="msg-screen" style="display:none">
+        <h1 style="color:var(--accent)">Sesión Terminada</h1>
+        <p id="msg-subtitulo" style="font-size: 1.2rem; line-height: 1.8; white-space: pre-wrap;"></p>
+        <button class="btn-grande" onclick="location.reload()">Cerrar</button>
+    </div>
+
+    <div class="header-clinico">
+        <div>NIVEL <span id="val-nivel" class="stat-val">1</span></div>
+        <div>VIDAS <span id="val-vidas" class="stat-val">2</span></div>
+        <div>FALLOS <span id="val-err" style="color:var(--error)" class="stat-val">0</span></div>
+        <div>TIEMPO <span id="val-timer" class="stat-val">0.0s</span></div>
+    </div>
+
+    <div class="grid" id="grid">
+        <div class="tile" onclick="userClick(0)"></div>
+        <div class="tile" onclick="userClick(1)"></div>
+        <div class="tile" onclick="userClick(2)"></div>
+        <div class="tile" onclick="userClick(3)"></div>
+        <div class="tile" onclick="userClick(4)"></div>
+        <div class="tile" onclick="userClick(5)"></div>
+        <div class="tile" onclick="userClick(6)"></div>
+        <div class="tile" onclick="userClick(7)"></div>
+        <div class="tile" onclick="userClick(8)"></div>
     </div>
 
     <script>
-        let paciente = "", sequence = [], userSequence = [], level = 1, canPlay = false, aciertos = 0;
+        let paciente = "", nivel = 1, secuencia = [], userSeq = [], fallosTotales = 0, vidas = 2;
+        let jugando = false, startTime, timerInterval;
 
-        function irAInstrucciones() {
+        function mostrarInstrucciones() {
             paciente = document.getElementById('nombrePaciente').value.trim();
-            if(!paciente) return alert("Nombre requerido");
+            if(!paciente) return alert("Introduce el nombre");
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('instruction-screen').style.display = 'flex';
         }
 
         function comenzarJuego() {
             document.getElementById('instruction-screen').style.display = 'none';
-            document.getElementById('val-pac').innerText = paciente;
-            nextLevel();
+            iniciarNivel();
         }
 
-        function nextLevel() {
-            userSequence = []; canPlay = false;
-            document.getElementById('val-level').innerText = level;
-            sequence.push(Math.floor(Math.random() * 9) + 1);
-            showSequence();
+        function iniciarNivel() {
+            userSeq = [];
+            vidas = 2;
+            document.getElementById('val-vidas').innerText = vidas;
+            secuencia.push(Math.floor(Math.random() * 9));
+            mostrarSecuencia();
         }
 
-        async function showSequence() {
-            for (let id of sequence) {
+        async function mostrarSecuencia() {
+            jugando = false;
+            resetTimer();
+            await new Promise(r => setTimeout(r, 800));
+            for(let id of secuencia) {
+                let t = document.getElementsByClassName('tile')[id];
+                t.classList.add('active');
                 await new Promise(r => setTimeout(r, 600));
-                const p = document.querySelector(`[data-id="${id}"]`);
-                p.classList.add('active');
-                await new Promise(r => setTimeout(r, 400));
-                p.classList.remove('active');
+                t.classList.remove('active');
+                await new Promise(r => setTimeout(r, 200));
             }
-            canPlay = true;
+            jugando = true;
+            startTimer();
         }
 
-        function panelClick(id) {
-            if (!canPlay) return;
-            userSequence.push(id);
-            if (userSequence[userSequence.length-1] !== sequence[userSequence.length-1]) return gameOver();
-            aciertos++;
-            if (userSequence.length === sequence.length) { level++; nextLevel(); }
+        function userClick(id) {
+            if(!jugando) return;
+            let tiles = document.getElementsByClassName('tile');
+            
+            if(id === secuencia[userSeq.length]) {
+                tiles[id].classList.add('correct');
+                setTimeout(() => tiles[id].classList.remove('correct'), 300);
+                userSeq.push(id);
+                if(userSeq.length === secuencia.length) {
+                    jugando = false;
+                    stopTimer();
+                    document.getElementById('stats-nivel').innerText = `¡Nivel ${nivel} superado en ${document.getElementById('val-timer').innerText}!`;
+                    document.getElementById('next-level-screen').style.display = 'flex';
+                }
+            } else {
+                jugando = false;
+                fallosTotales++;
+                vidas--;
+                document.getElementById('val-err').innerText = fallosTotales;
+                document.getElementById('val-vidas').innerText = vidas;
+                tiles[id].classList.add('wrong');
+                setTimeout(() => {
+                    tiles[id].classList.remove('wrong');
+                    if(vidas > 0) { userSeq = []; mostrarSecuencia(); } 
+                    else { finalizarYEnviar(); }
+                }, 800);
+            }
         }
 
-        function gameOver() {
-            canPlay = false;
-            document.querySelectorAll('.panel').forEach(p => p.classList.add('error'));
-            const URL_FORM = "https://docs.google.com/forms/d/e/1FAIpQLScIgP6SFKo8ACneK7EdifzxCyl8haYU7LLIys1NxjIiUklkWA/formResponse";
-            const formData = new FormData();
-            formData.append("entry.1971645483", paciente);
-            formData.append("entry.1310127986", "Memoria Secuencial");
-            formData.append("entry.1881234158", level);
-            formData.append("entry.2029359389", aciertos);
-            formData.append("entry.2036354186", "1");
-            formData.append("entry.934609722", "N/A");
-            formData.append("entry.143370750", new Date().toLocaleDateString());
+        function prepararSiguienteRonda() {
+            nivel++;
+            document.getElementById('val-nivel').innerText = nivel;
+            document.getElementById('next-level-screen').style.display = 'none';
+            iniciarNivel();
+        }
 
-            fetch(URL_FORM, { method: "POST", mode: "no-cors", body: formData })
-            .then(() => { alert("Fin del juego. Nivel: " + level); location.reload(); });
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                let diff = (Date.now() - startTime) / 1000;
+                document.getElementById('val-timer').innerText = diff.toFixed(1) + "s";
+            }, 100);
+        }
+        function stopTimer() { clearInterval(timerInterval); }
+        function resetTimer() { document.getElementById('val-timer').innerText = "0.0s"; }
+
+        function finalizarYEnviar() {
+            stopTimer();
+            const tiempoFinal = document.getElementById('val-timer').innerText;
+            const URL_FORM = "https://docs.google.com/forms/d/e/1FAIpQLScTLPpumt34oTOYtN4zll18UhU7uCWFvix60cSEDTRCPOaaoQ/formResponse";
+            
+            const fd = new FormData();
+            fd.append("entry.553775527", paciente);
+            fd.append("entry.296686519", "Memoria visual secuencial");
+            fd.append("entry.1981171900", nivel);
+            fd.append("entry.487384200", secuencia.length);
+            fd.append("entry.62032707", fallosTotales);
+            fd.append("entry.1275496988", tiempoFinal);
+            fd.append("entry.1657973129", new Date().toISOString().split('T')[0]);
+
+            fetch(URL_FORM, { method: "POST", mode: "no-cors", body: fd });
+
+            document.getElementById('msg-subtitulo').innerText = `Paciente: ${paciente}\nNivel Alcanzado: ${nivel}\nFallos: ${fallosTotales}\nTiempo: ${tiempoFinal}`;
+            document.getElementById('msg-screen').style.display = 'flex';
         }
     </script>
 </body>
