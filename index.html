@@ -11,6 +11,7 @@
         }
         body { margin: 0; font-family: 'Montserrat'; background: var(--bg); color: var(--primary); overflow: hidden; height: 100vh; }
         
+        /* Encabezado */
         .header { height: 80px; background: #1e293b; display: flex; justify-content: space-around; align-items: center; border-bottom: 4px solid var(--blue); }
         .stat { text-align: center; }
         .stat b { display: block; color: var(--blue); font-size: 0.7rem; text-transform: uppercase; }
@@ -18,6 +19,7 @@
 
         #game-area { height: calc(100vh - 80px); display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
+        /* Tablero Dinámico */
         .grid { display: grid; gap: 12px; background: var(--card); padding: 20px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: 0.5s; }
         .grid-3x3 { grid-template-columns: repeat(3, 1fr); }
         .grid-4x4 { grid-template-columns: repeat(4, 1fr); }
@@ -29,17 +31,18 @@
         }
         .tile.active { background: var(--blue); transform: scale(1.05); box-shadow: 0 0 35px var(--blue); border: 3px solid white; }
 
+        /* Pantallas */
         .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.98); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .card { background: #1e293b; border-radius: 40px; padding: 40px; width: 100%; max-width: 450px; text-align: center; border: 1px solid #334155; }
         
         .habilidades { text-align: left; background: #334155; padding: 20px; border-radius: 20px; margin: 20px 0; border-left: 5px solid var(--pink); }
-        .habilidades h4 { margin: 0 0 5px 0; color: var(--pink); font-size: 0.8rem; }
-        .habilidades p { margin: 0; font-size: 0.8rem; color: #cbd5e1; }
+        .habilidades h4 { margin: 0 0 5px 0; color: var(--pink); font-size: 0.85rem; text-transform: uppercase; }
+        .habilidades p { margin: 0; font-size: 0.85rem; color: #cbd5e1; line-height: 1.4; }
 
         .btn { background: var(--pink); color: white; padding: 18px; border-radius: 20px; font-weight: 900; border: none; cursor: pointer; width: 100%; font-size: 1.1rem; text-transform: uppercase; box-shadow: 0 6px 0 #9f1239; }
         .btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #9f1239; }
 
-        #msg-guia { font-size: 2rem; font-weight: 900; color: var(--blue); margin-bottom: 20px; text-shadow: 0 0 10px rgba(56, 189, 248, 0.3); }
+        #msg-guia { font-size: 2.2rem; font-weight: 900; color: var(--blue); margin-bottom: 20px; text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
         #flash { position: fixed; inset: 0; background: rgba(255, 46, 99, 0.2); pointer-events: none; opacity: 0; z-index: 3000; }
         @keyframes errorFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
     </style>
@@ -52,26 +55,27 @@
     <div class="card">
         <h1 style="color:var(--blue); margin:0;">Memoria Visual PRO</h1>
         <div class="habilidades">
-            <h4>🎯 OBJETIVOS CLÍNICOS:</h4>
-            <p>Entrenaremos <b>memoria secuencial</b> y <b>atención</b>. Tienes 2 vidas. ¡Cada 6 niveles ganarás una extra!</p>
+            <h4>🎯 OBJETIVOS TERAPÉUTICOS:</h4>
+            <p>Trabajaremos tu <b>memoria de trabajo visual</b>, la <b>secuenciación lógica</b> y la <b>atención sostenida</b> bajo condiciones de bajo contraste.</p>
         </div>
+        <p style="color:#cbd5e1; font-size: 0.8rem; margin-bottom: 20px;">Tienes 2 vidas. Cada 6 niveles obtendrás una extra.</p>
         <button class="btn" onclick="startGame()">Comenzar Entrenamiento</button>
     </div>
 </div>
 
 <div id="screen-pause" class="overlay" style="display:none">
     <div class="card">
-        <h1 id="pause-title" style="color:var(--success)">¡EXCELENTE! 🌟</h1>
-        <p id="pause-msg" style="color:#cbd5e1">Nivel completado. Descansa un momento.</p>
+        <h1 id="pause-title" style="color:var(--success)">¡MUY BIEN! 🌟</h1>
+        <p id="pause-msg" style="color:#cbd5e1"></p>
         <button class="btn" onclick="continuarSiguienteNivel()" style="background:var(--blue); box-shadow: 0 6px 0 #0369a1;">Siguiente Nivel</button>
     </div>
 </div>
 
 <div id="screen-end" class="overlay" style="display:none">
     <div class="card">
-        <h1 style="color:var(--pink)">FIN DE LA SESIÓN</h1>
-        <p>Te has quedado sin vidas. Tus resultados se han enviado al especialista.</p>
-        <div id="status-envio" style="margin:15px 0; font-weight:bold; color:var(--success);">🚀 Sincronizando datos...</div>
+        <h1 style="color:var(--pink)">SESIÓN FINALIZADA</h1>
+        <p>Se han agotado las vidas disponibles.</p>
+        <div id="status-envio" style="margin:20px 0; font-weight:900; color:var(--success); font-size: 1.2rem;">🚀 ENVIANDO AL EXCEL...</div>
         <button class="btn" onclick="window.location.href='index.html'" style="background:#475569; box-shadow: 0 6px 0 #1e293b;">VOLVER AL MENÚ</button>
     </div>
 </div>
@@ -83,7 +87,7 @@
 </div>
 
 <div id="game-area">
-    <div id="msg-guia">¡LISTO!</div>
+    <div id="msg-guia">¡PREPARADO!</div>
     <div id="grid-elementos" class="grid grid-3x3"></div>
 </div>
 
@@ -96,6 +100,7 @@
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
     function playTone(freq, dur=0.3) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
@@ -106,7 +111,6 @@
     }
 
     function startGame() {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
         document.getElementById('screen-start').style.display = 'none';
         jugando = true;
         actualizarTablero();
@@ -141,12 +145,12 @@
         let cantFiguras = (nivel > 6) ? 16 : 9;
         for(let i=0; i < largo; i++) secuencia.push(Math.floor(Math.random() * cantFiguras));
         
-        setTimeout(reproducirSecuencia, 800);
+        setTimeout(reproducirSecuencia, 1000);
     }
 
     async function reproducirSecuencia() {
         const tiles = document.getElementsByClassName('tile');
-        const flashTime = Math.max(200, 600 - (nivel * 35)); 
+        const flashTime = Math.max(200, 600 - (nivel * 30)); 
         
         for(let i=0; i < secuencia.length; i++) {
             await new Promise(r => setTimeout(r, flashTime + 100));
@@ -168,7 +172,7 @@
         const tiles = document.getElementsByClassName('tile');
         
         if(index === secuencia[secuenciaUsuario.length]) {
-            playTone(500 + (index * 30), 0.2);
+            playTone(550 + (index * 20), 0.15);
             tiles[index].classList.add('active');
             setTimeout(() => tiles[index].classList.remove('active'), 200);
             secuenciaUsuario.push(index);
@@ -176,12 +180,12 @@
             if(secuenciaUsuario.length === secuencia.length) {
                 totalAciertos++;
                 document.getElementById('txt-ok').innerText = totalAciertos;
-                setTimeout(mostrarPausa, 500);
+                setTimeout(mostrarPausa, 600);
             }
         } else {
             vidas--;
             document.getElementById('txt-vidas').innerText = vidas;
-            playTone(150, 0.5);
+            playTone(140, 0.4);
             document.getElementById('flash').style.animation = "none"; document.getElementById('flash').offsetHeight; 
             document.getElementById('flash').style.animation = "errorFlash 0.5s";
             
@@ -189,29 +193,28 @@
                 finalizarJuego();
             } else {
                 mostrando = true;
-                document.getElementById('msg-guia').innerText = "¡CUIDADO! -1 VIDA";
-                setTimeout(iniciarRonda, 1500);
+                document.getElementById('msg-guia').innerText = "¡ERROR!";
+                setTimeout(iniciarRonda, 1200);
             }
         }
     }
 
     function mostrarPausa() {
         jugando = false;
-        let msgExtra = "Prepárate para el siguiente reto.";
+        let msg = "¡Excelente secuencia! Prepárate para subir la dificultad.";
         
-        // Vida extra cada 6 niveles
         if(nivel % 6 === 0) {
             vidas++;
             document.getElementById('txt-vidas').innerText = vidas;
-            document.getElementById('pause-title').innerText = "¡NIVEL " + nivel + " + VIDA EXTRA! ❤️";
-            msgExtra = "Has ganado una vida extra por tu gran desempeño.";
+            document.getElementById('pause-title').innerText = "¡BONUS DE VIDA! ❤️";
+            msg = "Has ganado una vida extra por superar el nivel " + nivel + ".";
         } else {
-            document.getElementById('pause-title').innerText = "¡NIVEL " + nivel + " SUPERADO!";
+            document.getElementById('pause-title').innerText = "¡NIVEL " + nivel + " COMPLETADO!";
         }
 
-        if(nivel === 6) msgExtra += " ¡A partir de ahora el tablero será de 4x4!";
+        if(nivel === 6) msg = "¡Atención! En el siguiente nivel el tablero crecerá a 4x4.";
         
-        document.getElementById('pause-msg').innerText = msgExtra;
+        document.getElementById('pause-msg').innerText = msg;
         document.getElementById('screen-pause').style.display = 'flex';
     }
 
@@ -237,10 +240,10 @@
 
         const datos = {
             "entry.369874016": paciente,
-            "entry.1353470174": "Memoria Secuencial (Prof: " + profesional + ")",
+            "entry.1353470174": "Memoria Visual PRO (Fondo Oscuro)",
             "entry.721051298": nivel,
             "entry.873272199": totalAciertos,
-            "entry.1030094511": "Sesión Finalizada por Vidas 0",
+            "entry.1030094511": "Profesional: " + profesional,
             "entry.1303309812": "N/A",
             "entry.845098414": new Date().toLocaleDateString()
         };
@@ -257,11 +260,12 @@
         form.submit();
         
         setTimeout(() => { 
-            document.getElementById('status-envio').innerText = "✅ DATOS GUARDADOS EN HISTORIAL";
-        }, 2500);
+            document.getElementById('status-envio').innerText = "✅ DATOS SINCRONIZADOS";
+        }, 3000);
     }
 </script>
 </body>
 </html>
+
 
 
