@@ -2,81 +2,76 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Tiempo de Reacción PRO - Clínica Visual</title>
+    <title>Memoria Visual Secuencial PRO</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg: #f0f7ff; --primary: #2d3436; --pink: #ff2e63; 
+            --bg: #f0f4f8; --primary: #2d3436; --pink: #ff2e63; 
             --blue: #0984e3; --card: #ffffff; --success: #00b894;
         }
         body { margin: 0; font-family: 'Montserrat'; background: var(--bg); color: var(--primary); overflow: hidden; height: 100vh; }
         
-        /* Barra Admin */
-        #admin-bar { display: none; background: var(--primary); color: white; padding: 10px 20px; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; z-index: 3000; box-sizing: border-box; font-size: 0.8rem; }
-        .btn-view { background: var(--blue); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-
-        .header { height: 80px; background: white; display: flex; justify-content: space-around; align-items: center; border-bottom: 4px solid var(--pink); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        /* Encabezado Clínico */
+        .header { height: 80px; background: white; display: flex; justify-content: space-around; align-items: center; border-bottom: 4px solid var(--blue); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .stat { text-align: center; }
-        .stat b { display: block; color: var(--pink); font-size: 0.7rem; text-transform: uppercase; }
+        .stat b { display: block; color: var(--blue); font-size: 0.7rem; text-transform: uppercase; }
         .stat span { font-size: 1.5rem; font-weight: 900; }
 
-        #game-area { height: calc(100vh - 80px); position: relative; cursor: crosshair; }
+        #game-area { height: calc(100vh - 80px); display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        .target { 
-            position: absolute; border-radius: 50%; background: radial-gradient(circle, #74b9ff, var(--blue));
-            box-shadow: 0 10px 20px rgba(9, 132, 227, 0.3); cursor: pointer; 
-            border: 4px solid white; transition: transform 0.1s; z-index: 100;
+        /* Grilla de 9 recuadros (3x3) */
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; background: #dfe6e9; padding: 20px; border-radius: 30px; box-shadow: inset 0 5px 15px rgba(0,0,0,0.05); }
+        .tile { 
+            width: 95px; height: 95px; background: var(--card); border-radius: 20px; 
+            display: flex; align-items: center; justify-content: center; font-size: 2.8rem;
+            cursor: pointer; border: none; transition: 0.3s; 
+            user-select: none; box-shadow: 0 8px 0 #b2bec3;
         }
+        .tile.active { background: var(--blue); transform: scale(1.1); box-shadow: 0 0 30px rgba(9, 132, 227, 0.5); border: 4px solid white; }
+        .tile:active { transform: scale(0.95); box-shadow: 0 2px 0 #b2bec3; }
 
-        /* Pantallas y Cards */
+        /* Pantallas Overlay */
         .overlay { position: fixed; inset: 0; background: rgba(45, 52, 54, 0.95); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .card { background: white; border-radius: 40px; padding: 40px; width: 100%; max-width: 450px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); position: relative; }
+        .card { background: white; border-radius: 40px; padding: 40px; width: 100%; max-width: 450px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         
-        .habilidades { text-align: left; background: #f1f2f6; padding: 20px; border-radius: 20px; margin: 20px 0; border-left: 5px solid var(--blue); }
-        .habilidades h4 { margin: 0 0 10px 0; color: var(--blue); font-size: 0.9rem; }
-        
-        .btn { background: var(--success); color: white; padding: 20px; border-radius: 20px; font-weight: 900; border: none; cursor: pointer; width: 100%; font-size: 1.2rem; text-transform: uppercase; transition: 0.2s; box-shadow: 0 8px 0 #009475; }
-        .btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #009475; }
+        .habilidades { text-align: left; background: #eef2f7; padding: 20px; border-radius: 20px; margin: 20px 0; border-left: 5px solid var(--pink); }
+        .habilidades h4 { margin: 0 0 10px 0; color: var(--pink); font-size: 0.9rem; }
+        .habilidades p { margin: 0; font-size: 0.85rem; line-height: 1.5; color: #636e72; }
 
-        #msg-nivel-superado { color: var(--success); font-size: 1.5rem; font-weight: 900; margin-bottom: 15px; }
-        #flash { position: fixed; inset: 0; background: rgba(255, 46, 99, 0.3); pointer-events: none; opacity: 0; z-index: 4000; }
-        @keyframes errorFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
+        .btn { background: var(--pink); color: white; padding: 20px; border-radius: 20px; font-weight: 900; border: none; cursor: pointer; width: 100%; font-size: 1.2rem; text-transform: uppercase; box-shadow: 0 8px 0 #d63031; transition: 0.2s; }
+        .btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #d63031; }
+
+        #msg-guia { font-size: 1.8rem; font-weight: 900; color: var(--blue); margin-bottom: 25px; }
     </style>
 </head>
 <body>
 
-<div id="flash"></div>
-
-<div id="admin-bar">
-    <span>CONTROL PROFESIONAL - TIEMPO DE REACCIÓN</span>
-    <button class="btn-view" onclick="window.open('https://docs.google.com/spreadsheets/d/1Tm068QA9fWLAmnrqYgIqDdcl211OZkyIpcd0/edit', '_blank')">📊 EXCEL</button>
-</div>
-
 <div id="screen-start" class="overlay">
     <div class="card">
-        <button style="position:absolute; top:25px; right:25px; background:none; border:none; font-size:1.2rem; cursor:pointer;" onclick="activarAdmin()">⚙️</button>
-        <h1 style="color:var(--blue)">¡Hola, <span id="user-name">Paciente</span>!</h1>
+        <h1 style="color:var(--blue); margin:0;">¡Hola, <span id="user-name">Paciente</span>!</h1>
         <div class="habilidades">
-            <h4>🎯 OBJETIVOS DE HOY:</h4>
-            <p style="font-size:0.85rem; color:#636e72; margin:0">Entrenaremos tu <b>velocidad de procesamiento</b> y tu <b>coordinación ojo-mano</b>. Toca los círculos lo más rápido que puedas.</p>
+            <h4>🎯 OBJETIVOS DE HOY (MEMORIA):</h4>
+            <p>Entrenaremos tu <b>memoria visual de corto plazo</b>, la <b>secuenciación lógica</b> de estímulos y tu <b>atención sostenida</b>.</p>
         </div>
-        <button class="btn" onclick="startGame()">¡Comenzar Test!</button>
+        <p style="font-size: 0.9rem; color: #2d3436; margin-bottom: 20px;">
+            Mira las figuras que se iluminan y repite el orden exacto.
+        </p>
+        <button class="btn" onclick="startGame()">Comenzar Entrenamiento</button>
     </div>
 </div>
 
 <div id="screen-pause" class="overlay" style="display:none">
     <div class="card">
-        <div id="msg-nivel-superado">¡NIVEL COMPLETADO! 🌟</div>
-        <p style="color:#636e72">Tómate un respiro. El siguiente nivel será un poco más rápido.</p>
-        <button class="btn" onclick="continuarSiguienteNivel()" style="background:var(--blue); box-shadow: 0 8px 0 #0763ad;">SIGUIENTE NIVEL</button>
+        <h1 style="color:var(--success)">¡MUY BIEN! 🌟</h1>
+        <p style="color:#636e72">Nivel completado con éxito. Descansa un momento antes de subir la dificultad.</p>
+        <button class="btn" onclick="continuarSiguienteNivel()" style="background:var(--blue); box-shadow: 0 8px 0 #0763ad;">Siguiente Nivel</button>
     </div>
 </div>
 
 <div id="screen-end" class="overlay" style="display:none">
     <div class="card">
-        <h1 style="color:var(--pink)">SESIÓN TERMINADA</h1>
-        <p>Tus resultados han sido enviados al profesional.</p>
-        <div id="status-envio" style="margin:10px 0; font-weight:bold; color:var(--success);">Sincronizando...</div>
+        <h1 style="color:var(--success)">¡Sesión Terminada!</h1>
+        <p id="status-envio">Guardando resultados en tu historial...</p>
         <button class="btn" onclick="window.location.href='index.html'" style="background:var(--primary); box-shadow: 0 8px 0 #000;">VOLVER AL MENÚ</button>
     </div>
 </div>
@@ -85,98 +80,112 @@
     <div class="stat"><b>Nivel</b><span id="txt-nivel">1</span></div>
     <div class="stat"><b>Aciertos</b><span id="txt-ok">0</span></div>
     <div class="stat"><b>Vidas</b><span id="txt-vidas" style="color:var(--pink)">3</span></div>
-    <div class="stat"><b>Reacción</b><span id="txt-speed">0ms</span></div>
 </div>
 
-<div id="game-area" onclick="failClick()"></div>
+<div id="game-area">
+    <div id="msg-guia">¡LISTO!</div>
+    <div class="grid" id="grid-elementos"></div>
+</div>
 
 <script>
     const paciente = localStorage.getItem('paciente') || "Paciente";
     const profesional = localStorage.getItem('profesional') || "Especialista";
     document.getElementById('user-name').innerText = paciente;
 
-    let nivel = 1, totalAciertos = 0, aciertosNivel = 0, vidas = 3, jugando = false, spawnTimer;
+    let nivel = 1, vidas = 3, totalAciertos = 0, secuencia = [], secuenciaUsuario = [], mostrando = false, jugando = false;
+    const iconos = ["⭐", "🍎", "🎈", "🚗", "🐶", "🍕", "🚀", "🎸", "💎"];
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    function playSound(freq) {
+    function playTone(freq) {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
         gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
     }
-
-    function activarAdmin() { if(prompt("Clave:") === "1234") document.getElementById('admin-bar').style.display = 'flex'; }
 
     function startGame() {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         document.getElementById('screen-start').style.display = 'none';
         jugando = true;
+        crearTablero();
         iniciarRonda();
     }
 
+    function crearTablero() {
+        const grid = document.getElementById('grid-elementos');
+        grid.innerHTML = "";
+        iconos.forEach((icono, index) => {
+            const tile = document.createElement('div');
+            tile.className = "tile";
+            tile.innerText = icono;
+            tile.onclick = () => manejarClick(index);
+            grid.appendChild(tile);
+        });
+    }
+
     function iniciarRonda() {
-        aciertosNivel = 0;
+        if(!jugando) return;
+        mostrando = true;
+        secuenciaUsuario = [];
+        document.getElementById('msg-guia').innerText = "¡MIRA!";
+        document.getElementById('msg-guia').style.color = "var(--pink)";
         document.getElementById('txt-nivel').innerText = nivel;
         document.getElementById('txt-vidas').innerText = vidas;
-        spawnTarget();
+        
+        secuencia = [];
+        const largo = 2 + Math.floor(nivel/2);
+        for(let i=0; i < largo; i++) secuencia.push(Math.floor(Math.random() * 9));
+        
+        setTimeout(reproducirSecuencia, 1000);
     }
 
-    function spawnTarget() {
-        if(!jugando) return;
-        const area = document.getElementById('game-area');
-        area.innerHTML = "";
-        
-        const target = document.createElement('div');
-        target.className = "target";
-        const size = Math.max(40, 100 - (nivel * 6));
-        target.style.width = size + "px";
-        target.style.height = size + "px";
-        
-        const x = Math.random() * (window.innerWidth - size - 40);
-        const y = Math.random() * (window.innerHeight - 150 - size);
-        target.style.left = x + "px"; target.style.top = y + "px";
-        
-        const timeLimit = Math.max(600, 2000 - (nivel * 150));
-        
-        target.onclick = (e) => {
-            e.stopPropagation();
-            playSound(600 + (nivel * 50));
-            const reaccion = Date.now() - tiempoAparicion;
-            document.getElementById('txt-speed').innerText = reaccion + "ms";
-            totalAciertos++; aciertosNivel++;
-            document.getElementById('txt-ok').innerText = totalAciertos;
-            
-            clearTimeout(spawnTimer);
-            if(aciertosNivel >= 7) {
+    async function reproducirSecuencia() {
+        const tiles = document.getElementsByClassName('tile');
+        for(let i=0; i < secuencia.length; i++) {
+            await new Promise(r => setTimeout(r, 600));
+            const idx = secuencia[i];
+            tiles[idx].classList.add('active');
+            playTone(350 + (idx * 50));
+            await new Promise(r => setTimeout(r, 500));
+            tiles[idx].classList.remove('active');
+        }
+        mostrando = false;
+        document.getElementById('msg-guia').innerText = "¡TU TURNO!";
+        document.getElementById('msg-guia').style.color = "var(--blue)";
+    }
+
+    function manejarClick(index) {
+        if(mostrando || !jugando) return;
+        if(index === secuencia[secuenciaUsuario.length]) {
+            playTone(500 + (index * 50));
+            secuenciaUsuario.push(index);
+            if(secuenciaUsuario.length === secuencia.length) {
+                totalAciertos++;
+                document.getElementById('txt-ok').innerText = totalAciertos;
                 mostrarPausa();
-            } else {
-                setTimeout(spawnTarget, 500);
             }
-        };
-
-        area.appendChild(target);
-        tiempoAparicion = Date.now();
-        spawnTimer = setTimeout(() => { if(jugando) failClick(); }, timeLimit);
+        } else {
+            fail();
+        }
     }
 
-    function failClick() {
-        if(!jugando) return;
+    function fail() {
         vidas--;
-        playSound(200);
+        playTone(150);
         document.getElementById('txt-vidas').innerText = vidas;
-        document.getElementById('flash').style.animation = "none"; document.getElementById('flash').offsetHeight; 
-        document.getElementById('flash').style.animation = "errorFlash 0.4s";
-        
         if(vidas <= 0) finalizarJuego();
-        else { clearTimeout(spawnTimer); setTimeout(spawnTarget, 1000); }
+        else {
+            mostrando = true;
+            document.getElementById('msg-guia').innerText = "¡OTRA VEZ! 🌈";
+            setTimeout(iniciarRonda, 1200);
+        }
     }
 
     function mostrarPausa() {
         jugando = false;
-        document.getElementById('game-area').innerHTML = "";
         document.getElementById('screen-pause').style.display = 'flex';
     }
 
@@ -189,7 +198,6 @@
 
     function finalizarJuego() {
         jugando = false;
-        document.getElementById('game-area').innerHTML = "";
         document.getElementById('screen-end').style.display = 'flex';
         enviarDatosFinales();
     }
@@ -198,28 +206,25 @@
         const formAction = "https://docs.google.com/forms/d/e/1FAIpQLSeLlcvlhrTSHDhvxctLghiM3caGsgBL2wdaT7nBxrz6UARwYg/formResponse";
         const form = document.createElement("form");
         form.method = "POST"; form.action = formAction; form.target = "hidden_iframe";
-
         const datos = {
             "entry.369874016": paciente,
-            "entry.1353470174": "Tiempo de Reacción (Prof: " + profesional + ")",
+            "entry.1353470174": "Memoria Secuencial (Prof: " + profesional + ")",
             "entry.721051298": nivel,
             "entry.873272199": totalAciertos,
             "entry.1030094511": "Sesión Finalizada",
-            "entry.1303309812": document.getElementById('txt-speed').innerText,
+            "entry.1303309812": "N/A",
             "entry.845098414": new Date().toLocaleDateString()
         };
-
         for (let key in datos) {
             const input = document.createElement("input");
             input.type = "hidden"; input.name = key; input.value = datos[key];
             form.appendChild(input);
         }
-
         const iframe = document.createElement("iframe");
         iframe.name = "hidden_iframe"; iframe.style.display = "none";
         document.body.appendChild(iframe); document.body.appendChild(form);
         form.submit();
-        setTimeout(() => { document.getElementById('status-envio').innerText = "✅ REPORTE EN EXCEL"; }, 2000);
+        setTimeout(() => { document.getElementById('status-envio').innerText = "✅ REPORTE ENVIADO AL EXCEL"; }, 2000);
     }
 </script>
 </body>
