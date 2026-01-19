@@ -2,227 +2,200 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memoria Clínica Pro - Terapia Visual</title>
+    <title>Memoria Visual - Clínica Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #0f172a; --accent: #38bdf8; --card: #1e293b; --error: #f43f5e; --success: #10b981; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
+        :root { --bg: #0a0f1d; --pink: #ff2e63; --blue: #08d9d6; --card: #16213e; }
+        body { margin: 0; font-family: 'Montserrat'; background: var(--bg); color: white; overflow: hidden; height: 100vh; }
         
-        #setup-screen, #instruction-screen, #msg-screen, #next-level-screen { 
-            position: fixed; inset: 0; background: var(--bg); z-index: 2000; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            padding: 20px; text-align: center; 
-        }
+        /* Barra Admin */
+        #admin-bar { display: none; background: var(--blue); color: #0a0f1d; padding: 10px 20px; justify-content: space-between; align-items: center; font-weight: bold; position: fixed; top: 0; width: 100%; z-index: 3000; box-sizing: border-box; }
+        .btn-view { background: #0a0f1d; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        /* Ficha de Objetivos Estilo Pro */
-        .ficha-objetivos {
-            background: rgba(56, 189, 248, 0.05);
-            border: 2px solid rgba(56, 189, 248, 0.2);
-            border-radius: 24px;
-            padding: 25px;
-            margin: 20px 0;
-            max-width: 450px;
-            text-align: left;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        .obj-item { display: flex; align-items: center; margin-bottom: 18px; }
-        .obj-icon {
-            font-size: 1.8rem;
-            margin-right: 20px;
-            background: var(--card);
-            min-width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 15px;
-        }
-        .obj-texto b { color: var(--accent); font-size: 1.1rem; display: block; margin-bottom: 2px; }
-        .obj-texto span { font-size: 0.95rem; color: #94a3b8; line-height: 1.4; }
-
-        .btn-grande { background: var(--accent); color: #0f172a; padding: 18px 45px; border-radius: 15px; font-size: 1.5rem; font-weight: bold; cursor: pointer; border: none; margin-top: 10px; transition: 0.3s; box-shadow: 0 5px 15px rgba(56, 189, 248, 0.3); }
-        .btn-grande:hover { transform: translateY(-3px); filter: brightness(1.1); }
+        .header { height: 70px; background: #1a1a2e; display: flex; justify-content: space-around; align-items: center; border-bottom: 5px solid var(--pink); }
+        .stat b { display: block; color: var(--blue); font-size: 0.7rem; }
         
-        .grid { display: grid; grid-template-columns: repeat(3, 110px); gap: 15px; margin-top: 30px; }
-        .tile { width: 110px; height: 110px; background: var(--card); border: 3px solid #334155; border-radius: 20px; cursor: pointer; transition: 0.2s; }
-        .tile.active { background: #fff !important; transform: scale(0.95); box-shadow: 0 0 30px #fff; }
-        .tile.correct { background: var(--success) !important; border-color: white; box-shadow: 0 0 20px var(--success); }
-        .tile.wrong { background: var(--error) !important; border-color: white; box-shadow: 0 0 20px var(--error); }
+        #game-area { height: calc(100vh - 70px); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .tile { 
+            width: 90px; height: 90px; background: var(--card); border-radius: 20px; 
+            display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
+            cursor: pointer; border: 4px solid transparent; transition: 0.2s; user-select: none;
+        }
+        .tile.active { background: var(--blue); transform: scale(1.1); border-color: white; box-shadow: 0 0 30px var(--blue); }
 
-        .header-clinico { width: 100%; background: rgba(30, 41, 59, 0.9); padding: 15px; border-bottom: 3px solid var(--accent); display: flex; justify-content: space-around; font-weight: bold; font-size: 0.9rem; }
-        .stat-val { color: var(--accent); font-size: 1.3rem; display: block; }
+        .overlay { position: fixed; inset: 0; background: rgba(10, 15, 29, 0.98); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        .card { background: white; color: #2d3436; border-radius: 40px; padding: 35px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 15px 0 var(--blue); position: relative; }
+        .btn { background: var(--pink); color: white; padding: 18px; border-radius: 20px; font-weight: 900; border: none; cursor: pointer; width: 100%; font-size: 1.2rem; margin-top: 15px; }
+        
+        .habilidades { text-align: left; background: #f1f2f6; padding: 15px; border-radius: 15px; margin: 15px 0; font-size: 0.8rem; color: #555; }
+        #msg-guia { font-size: 1.5rem; font-weight: 900; color: var(--blue); margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <div id="setup-screen">
-        <h1 style="color:var(--accent); font-size: 2.5rem;">MEMORIA SECUENCIAL</h1>
-        <input type="text" id="nombrePaciente" style="padding:15px; border-radius:12px; border:2px solid var(--accent); background:var(--card); color:white; width:300px; font-size:1.1rem;" placeholder="Nombre del Paciente">
-        <button class="btn-grande" onclick="mostrarInstrucciones()">Continuar</button>
-    </div>
+<div id="admin-bar">
+    <span>MODO PROFESIONAL: MEMORIA</span>
+    <button class="btn-view" onclick="window.open('https://docs.google.com/spreadsheets/d/1Tm068QA9fWLAmnrqYgIqDdcl211OZkyIpcd0/edit', '_blank')">📊 VER EXCEL</button>
+</div>
 
-    <div id="instruction-screen" style="display:none">
-        <h2 style="color:var(--accent); margin-bottom: 5px;">¿Qué vamos a trabajar hoy?</h2>
-        <p style="color: #94a3b8; margin-top: 0;">Objetivos Terapéuticos:</p>
-        
-        <div class="ficha-objetivos">
-            <div class="obj-item">
-                <div class="obj-icon">👁️</div>
-                <div class="obj-texto">
-                    <b>Atención y Fijación Visual</b>
-                    <span>Entrenar la capacidad de mantener la mirada fija y atenta en cada cuadro.</span>
-                </div>
-            </div>
-            <div class="obj-item">
-                <div class="obj-icon">🧩</div>
-                <div class="obj-texto">
-                    <b>Memoria de Trabajo</b>
-                    <span>Retener y organizar secuencias de información de forma ordenada.</span>
-                </div>
-            </div>
-            <div class="obj-item">
-                <div class="obj-icon">🚦</div>
-                <div class="obj-texto">
-                    <b>Control de Impulsos</b>
-                    <span>Aprender a procesar toda la información antes de dar una respuesta.</span>
-                </div>
-            </div>
+<div id="screen-start" class="overlay">
+    <div class="card">
+        <button style="position:absolute; top:20px; right:20px; background:none; border:none; opacity:0.3;" onclick="activarAdmin()">⚙️</button>
+        <h2 id="msg-bienvenida" style="color:var(--bg)">Cargando...</h2>
+        <div class="habilidades">
+            <b>HABILIDADES:</b><br>
+            • Memoria Visual Secuencial<br>
+            • Atención Sostenida<br>
+            • Procesamiento de Información
         </div>
-
-        <button class="btn-grande" onclick="comenzarJuego()">¡Empezar Terapia!</button>
+        <button class="btn" onclick="startGame()">EMPEZAR</button>
     </div>
+</div>
 
-    <div id="next-level-screen" style="display:none">
-        <h2 style="color:var(--success); font-size: 2.5rem;">¡Nivel Completado!</h2>
-        <p id="stats-nivel" style="font-size: 1.2rem;"></p>
-        <button class="btn-grande" onclick="prepararSiguienteRonda()">Siguiente Nivel ➔</button>
+<div id="screen-end" class="overlay" style="display:none">
+    <div class="card">
+        <h1 style="color:var(--pink)">SESIÓN FINALIZADA</h1>
+        <div id="status-envio" style="margin:20px 0; font-weight:bold; color:#009955;">📤 Sincronizando...</div>
+        <button class="btn" onclick="window.location.href='index.html'">VOLVER AL MENÚ</button>
     </div>
+</div>
 
-    <div id="msg-screen" style="display:none">
-        <h1 style="color:var(--accent)">Sesión Guardada</h1>
-        <p id="msg-subtitulo" style="font-size: 1.2rem; line-height: 1.8; white-space: pre-wrap;"></p>
-        <button class="btn-grande" onclick="location.reload()">Terminar</button>
-    </div>
+<div class="header">
+    <div class="stat"><b>NIVEL</b><span id="txt-nivel">1</span></div>
+    <div class="stat"><b>ACIERTOS</b><span id="txt-ok">0</span></div>
+    <div class="stat"><b>VIDAS</b><span id="txt-vidas" style="color:var(--pink)">3</span></div>
+</div>
 
-    <div class="header-clinico">
-        <div>NIVEL <span id="val-nivel" class="stat-val">1</span></div>
-        <div>VIDAS <span id="val-vidas" class="stat-val">2</span></div>
-        <div>FALLOS <span id="val-err" style="color:var(--error)" class="stat-val">0</span></div>
-        <div>TIEMPO <span id="val-timer" class="stat-val">0.0s</span></div>
-    </div>
+<div id="game-area">
+    <div id="msg-guia">¡ATENCIÓN!</div>
+    <div class="grid" id="grid-elementos"></div>
+</div>
 
-    <div class="grid" id="grid">
-        <div class="tile" onclick="userClick(0)"></div>
-        <div class="tile" onclick="userClick(1)"></div>
-        <div class="tile" onclick="userClick(2)"></div>
-        <div class="tile" onclick="userClick(3)"></div>
-        <div class="tile" onclick="userClick(4)"></div>
-        <div class="tile" onclick="userClick(5)"></div>
-        <div class="tile" onclick="userClick(6)"></div>
-        <div class="tile" onclick="userClick(7)"></div>
-        <div class="tile" onclick="userClick(8)"></div>
-    </div>
+<script>
+    // 1. CAPTURAR DATOS DEL PORTAL
+    const paciente = localStorage.getItem('paciente') || "Paciente";
+    const profesional = localStorage.getItem('profesional') || "Doc";
+    document.getElementById('msg-bienvenida').innerText = "Hola, " + paciente;
 
-    <script>
-        let paciente = "", nivel = 1, secuencia = [], userSeq = [], fallosTotales = 0, vidas = 2;
-        let jugando = false, startTime, timerInterval;
+    let nivel = 1, vidas = 3, totalAciertos = 0, secuencia = [], secuenciaUsuario = [], mostrando = false;
+    const iconos = ["⭐", "🍎", "🎈", "🚗", "🐶", "🍕", "🚀", "🎸", "💎"];
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        function mostrarInstrucciones() {
-            paciente = document.getElementById('nombrePaciente').value.trim();
-            if(!paciente) return alert("Introduce el nombre del paciente");
-            document.getElementById('setup-screen').style.display = 'none';
-            document.getElementById('instruction-screen').style.display = 'flex';
-        }
+    function playTone(freq) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+    }
 
-        function comenzarJuego() {
-            document.getElementById('instruction-screen').style.display = 'none';
-            iniciarNivel();
-        }
+    function activarAdmin() { if(prompt("Clave:") === "1234") document.getElementById('admin-bar').style.display = 'flex'; }
 
-        function iniciarNivel() {
-            userSeq = [];
-            vidas = 2;
-            document.getElementById('val-vidas').innerText = vidas;
+    function startGame() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        document.getElementById('screen-start').style.display = 'none';
+        crearTablero();
+        iniciarRonda();
+    }
+
+    function crearTablero() {
+        const grid = document.getElementById('grid-elementos');
+        grid.innerHTML = "";
+        iconos.forEach((icono, index) => {
+            const tile = document.createElement('div');
+            tile.className = "tile";
+            tile.innerText = icono;
+            tile.onclick = () => manejarClick(index);
+            grid.appendChild(tile);
+        });
+    }
+
+    function iniciarRonda() {
+        mostrando = true;
+        secuenciaUsuario = [];
+        document.getElementById('msg-guia').innerText = "¡MIRA!";
+        document.getElementById('txt-nivel').innerText = nivel;
+        document.getElementById('txt-vidas').innerText = vidas;
+        
+        secuencia = [];
+        for(let i=0; i < (1 + nivel); i++) {
             secuencia.push(Math.floor(Math.random() * 9));
-            mostrarSecuencia();
         }
+        setTimeout(reproducirSecuencia, 800);
+    }
 
-        async function mostrarSecuencia() {
-            jugando = false;
-            resetTimer();
-            await new Promise(r => setTimeout(r, 800));
-            for(let id of secuencia) {
-                let t = document.getElementsByClassName('tile')[id];
-                t.classList.add('active');
-                await new Promise(r => setTimeout(r, 600));
-                t.classList.remove('active');
-                await new Promise(r => setTimeout(r, 200));
+    async function reproducirSecuencia() {
+        const tiles = document.getElementsByClassName('tile');
+        for(let i=0; i < secuencia.length; i++) {
+            await new Promise(r => setTimeout(r, 600));
+            const idx = secuencia[i];
+            tiles[idx].classList.add('active');
+            playTone(400 + (idx * 40));
+            await new Promise(r => setTimeout(r, 400));
+            tiles[idx].classList.remove('active');
+        }
+        mostrando = false;
+        document.getElementById('msg-guia').innerText = "¡REPITE!";
+    }
+
+    function manejarClick(index) {
+        if(mostrando) return;
+        const tiles = document.getElementsByClassName('tile');
+        if(index === secuencia[secuenciaUsuario.length]) {
+            playTone(500 + (index * 40));
+            tiles[index].classList.add('active');
+            setTimeout(() => tiles[index].classList.remove('active'), 200);
+            secuenciaUsuario.push(index);
+            if(secuenciaUsuario.length === secuencia.length) {
+                totalAciertos++;
+                document.getElementById('txt-ok').innerText = totalAciertos;
+                nivel++;
+                setTimeout(iniciarRonda, 1000);
             }
-            jugando = true;
-            startTimer();
+        } else {
+            vidas--;
+            if(vidas <= 0) finalizarJuego();
+            else iniciarRonda();
+        }
+    }
+
+    function finalizarJuego() {
+        document.getElementById('screen-end').style.display = 'flex';
+        enviarDatosFinales();
+    }
+
+    // 2. ENVIAR AL EXCEL COMPARTIDO
+    function enviarDatosFinales() {
+        const formAction = "https://docs.google.com/forms/d/e/1FAIpQLSeLlcvlhrTSHDhvxctLghiM3caGsgBL2wdaT7nBxrz6UARwYg/formResponse";
+        const form = document.createElement("form");
+        form.method = "POST"; form.action = formAction; form.target = "hidden_iframe";
+
+        const datos = {
+            "entry.369874016": paciente,
+            "entry.1353470174": "Memoria Visual (Prof: " + profesional + ")",
+            "entry.721051298": nivel,
+            "entry.873272199": totalAciertos,
+            "entry.1030094511": "N/A",
+            "entry.1303309812": "Finalizado",
+            "entry.845098414": new Date().toISOString().split('T')[0]
+        };
+
+        for (let key in datos) {
+            const input = document.createElement("input");
+            input.type = "hidden"; input.name = key; input.value = datos[key];
+            form.appendChild(input);
         }
 
-        function userClick(id) {
-            if(!jugando) return;
-            let tiles = document.getElementsByClassName('tile');
-            if(id === secuencia[userSeq.length]) {
-                tiles[id].classList.add('correct');
-                setTimeout(() => tiles[id].classList.remove('correct'), 300);
-                userSeq.push(id);
-                if(userSeq.length === secuencia.length) {
-                    jugando = false; stopTimer();
-                    document.getElementById('stats-nivel').innerText = `¡Nivel ${nivel} superado!\nTiempo de respuesta: ${document.getElementById('val-timer').innerText}`;
-                    document.getElementById('next-level-screen').style.display = 'flex';
-                }
-            } else {
-                jugando = false; fallosTotales++; vidas--;
-                document.getElementById('val-err').innerText = fallosTotales;
-                document.getElementById('val-vidas').innerText = vidas;
-                tiles[id].classList.add('wrong');
-                setTimeout(() => {
-                    tiles[id].classList.remove('wrong');
-                    if(vidas > 0) { userSeq = []; mostrarSecuencia(); } 
-                    else { finalizarYEnviar(); }
-                }, 800);
-            }
-        }
-
-        function prepararSiguienteRonda() {
-            nivel++;
-            document.getElementById('val-nivel').innerText = nivel;
-            document.getElementById('next-level-screen').style.display = 'none';
-            iniciarNivel();
-        }
-
-        function startTimer() {
-            startTime = Date.now();
-            timerInterval = setInterval(() => {
-                let diff = (Date.now() - startTime) / 1000;
-                document.getElementById('val-timer').innerText = diff.toFixed(1) + "s";
-            }, 100);
-        }
-        function stopTimer() { clearInterval(timerInterval); }
-        function resetTimer() { document.getElementById('val-timer').innerText = "0.0s"; }
-
-        function finalizarYEnviar() {
-            stopTimer();
-            const tiempoFinal = document.getElementById('val-timer').innerText;
-            const URL_FORM = "https://docs.google.com/forms/d/e/1FAIpQLScTLPpumt34oTOYtN4zll18UhU7uCWFvix60cSEDTRCPOaaoQ/formResponse";
-            
-            const fd = new FormData();
-            fd.append("entry.553775527", paciente);
-            fd.append("entry.296686519", "Memoria visual secuencial");
-            fd.append("entry.1981171900", nivel);
-            fd.append("entry.487384200", secuencia.length);
-            fd.append("entry.62032707", fallosTotales);
-            fd.append("entry.1275496988", tiempoFinal);
-            fd.append("entry.1657973129", new Date().toISOString().split('T')[0]);
-
-            fetch(URL_FORM, { method: "POST", mode: "no-cors", body: fd });
-
-            document.getElementById('msg-subtitulo').innerText = `Resumen para el Profesional:\n\nPaciente: ${paciente}\nNivel Alcanzado: ${nivel}\nFallos de Precisión: ${fallosTotales}\nTiempo de Procesamiento: ${tiempoFinal}`;
-            document.getElementById('msg-screen').style.display = 'flex';
-        }
-    </script>
+        const iframe = document.createElement("iframe");
+        iframe.name = "hidden_iframe"; iframe.style.display = "none";
+        document.body.appendChild(iframe); document.body.appendChild(form);
+        form.submit();
+        setTimeout(() => { document.getElementById('status-envio').innerText = "✅ DATOS EN EXCEL"; }, 2000);
+    }
+</script>
 </body>
 </html>
+
