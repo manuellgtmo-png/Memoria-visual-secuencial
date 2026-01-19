@@ -2,87 +2,103 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Memoria Visual - Clínica Pro</title>
+    <title>Tiempo de Reacción PRO - Clínica Visual</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #0a0f1d; --pink: #ff2e63; --blue: #08d9d6; --card: #16213e; }
-        body { margin: 0; font-family: 'Montserrat'; background: var(--bg); color: white; overflow: hidden; height: 100vh; }
+        :root { 
+            --bg: #f0f7ff; --primary: #2d3436; --pink: #ff2e63; 
+            --blue: #0984e3; --card: #ffffff; --success: #00b894;
+        }
+        body { margin: 0; font-family: 'Montserrat'; background: var(--bg); color: var(--primary); overflow: hidden; height: 100vh; }
         
         /* Barra Admin */
-        #admin-bar { display: none; background: var(--blue); color: #0a0f1d; padding: 10px 20px; justify-content: space-between; align-items: center; font-weight: bold; position: fixed; top: 0; width: 100%; z-index: 3000; box-sizing: border-box; }
-        .btn-view { background: #0a0f1d; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #admin-bar { display: none; background: var(--primary); color: white; padding: 10px 20px; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; z-index: 3000; box-sizing: border-box; font-size: 0.8rem; }
+        .btn-view { background: var(--blue); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        .header { height: 70px; background: #1a1a2e; display: flex; justify-content: space-around; align-items: center; border-bottom: 5px solid var(--pink); }
-        .stat b { display: block; color: var(--blue); font-size: 0.7rem; }
+        .header { height: 80px; background: white; display: flex; justify-content: space-around; align-items: center; border-bottom: 4px solid var(--pink); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .stat { text-align: center; }
+        .stat b { display: block; color: var(--pink); font-size: 0.7rem; text-transform: uppercase; }
+        .stat span { font-size: 1.5rem; font-weight: 900; }
+
+        #game-area { height: calc(100vh - 80px); position: relative; cursor: crosshair; }
         
-        #game-area { height: calc(100vh - 70px); display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .tile { 
-            width: 90px; height: 90px; background: var(--card); border-radius: 20px; 
-            display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
-            cursor: pointer; border: 4px solid transparent; transition: 0.2s; user-select: none;
+        .target { 
+            position: absolute; border-radius: 50%; background: radial-gradient(circle, #74b9ff, var(--blue));
+            box-shadow: 0 10px 20px rgba(9, 132, 227, 0.3); cursor: pointer; 
+            border: 4px solid white; transition: transform 0.1s; z-index: 100;
         }
-        .tile.active { background: var(--blue); transform: scale(1.1); border-color: white; box-shadow: 0 0 30px var(--blue); }
 
-        .overlay { position: fixed; inset: 0; background: rgba(10, 15, 29, 0.98); z-index: 2000; display: flex; align-items: center; justify-content: center; }
-        .card { background: white; color: #2d3436; border-radius: 40px; padding: 35px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 15px 0 var(--blue); position: relative; }
-        .btn { background: var(--pink); color: white; padding: 18px; border-radius: 20px; font-weight: 900; border: none; cursor: pointer; width: 100%; font-size: 1.2rem; margin-top: 15px; }
+        /* Pantallas y Cards */
+        .overlay { position: fixed; inset: 0; background: rgba(45, 52, 54, 0.95); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .card { background: white; border-radius: 40px; padding: 40px; width: 100%; max-width: 450px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); position: relative; }
         
-        .habilidades { text-align: left; background: #f1f2f6; padding: 15px; border-radius: 15px; margin: 15px 0; font-size: 0.8rem; color: #555; }
-        #msg-guia { font-size: 1.5rem; font-weight: 900; color: var(--blue); margin-bottom: 20px; }
+        .habilidades { text-align: left; background: #f1f2f6; padding: 20px; border-radius: 20px; margin: 20px 0; border-left: 5px solid var(--blue); }
+        .habilidades h4 { margin: 0 0 10px 0; color: var(--blue); font-size: 0.9rem; }
+        
+        .btn { background: var(--success); color: white; padding: 20px; border-radius: 20px; font-weight: 900; border: none; cursor: pointer; width: 100%; font-size: 1.2rem; text-transform: uppercase; transition: 0.2s; box-shadow: 0 8px 0 #009475; }
+        .btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #009475; }
+
+        #msg-nivel-superado { color: var(--success); font-size: 1.5rem; font-weight: 900; margin-bottom: 15px; }
+        #flash { position: fixed; inset: 0; background: rgba(255, 46, 99, 0.3); pointer-events: none; opacity: 0; z-index: 4000; }
+        @keyframes errorFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
     </style>
 </head>
 <body>
 
+<div id="flash"></div>
+
 <div id="admin-bar">
-    <span>MODO PROFESIONAL: MEMORIA</span>
-    <button class="btn-view" onclick="window.open('https://docs.google.com/spreadsheets/d/1Tm068QA9fWLAmnrqYgIqDdcl211OZkyIpcd0/edit', '_blank')">📊 VER EXCEL</button>
+    <span>CONTROL PROFESIONAL - TIEMPO DE REACCIÓN</span>
+    <button class="btn-view" onclick="window.open('https://docs.google.com/spreadsheets/d/1Tm068QA9fWLAmnrqYgIqDdcl211OZkyIpcd0/edit', '_blank')">📊 EXCEL</button>
 </div>
 
 <div id="screen-start" class="overlay">
     <div class="card">
-        <button style="position:absolute; top:20px; right:20px; background:none; border:none; opacity:0.3;" onclick="activarAdmin()">⚙️</button>
-        <h2 id="msg-bienvenida" style="color:var(--bg)">Cargando...</h2>
+        <button style="position:absolute; top:25px; right:25px; background:none; border:none; font-size:1.2rem; cursor:pointer;" onclick="activarAdmin()">⚙️</button>
+        <h1 style="color:var(--blue)">¡Hola, <span id="user-name">Paciente</span>!</h1>
         <div class="habilidades">
-            <b>HABILIDADES:</b><br>
-            • Memoria Visual Secuencial<br>
-            • Atención Sostenida<br>
-            • Procesamiento de Información
+            <h4>🎯 OBJETIVOS DE HOY:</h4>
+            <p style="font-size:0.85rem; color:#636e72; margin:0">Entrenaremos tu <b>velocidad de procesamiento</b> y tu <b>coordinación ojo-mano</b>. Toca los círculos lo más rápido que puedas.</p>
         </div>
-        <button class="btn" onclick="startGame()">EMPEZAR</button>
+        <button class="btn" onclick="startGame()">¡Comenzar Test!</button>
+    </div>
+</div>
+
+<div id="screen-pause" class="overlay" style="display:none">
+    <div class="card">
+        <div id="msg-nivel-superado">¡NIVEL COMPLETADO! 🌟</div>
+        <p style="color:#636e72">Tómate un respiro. El siguiente nivel será un poco más rápido.</p>
+        <button class="btn" onclick="continuarSiguienteNivel()" style="background:var(--blue); box-shadow: 0 8px 0 #0763ad;">SIGUIENTE NIVEL</button>
     </div>
 </div>
 
 <div id="screen-end" class="overlay" style="display:none">
     <div class="card">
-        <h1 style="color:var(--pink)">SESIÓN FINALIZADA</h1>
-        <div id="status-envio" style="margin:20px 0; font-weight:bold; color:#009955;">📤 Sincronizando...</div>
-        <button class="btn" onclick="window.location.href='index.html'">VOLVER AL MENÚ</button>
+        <h1 style="color:var(--pink)">SESIÓN TERMINADA</h1>
+        <p>Tus resultados han sido enviados al profesional.</p>
+        <div id="status-envio" style="margin:10px 0; font-weight:bold; color:var(--success);">Sincronizando...</div>
+        <button class="btn" onclick="window.location.href='index.html'" style="background:var(--primary); box-shadow: 0 8px 0 #000;">VOLVER AL MENÚ</button>
     </div>
 </div>
 
 <div class="header">
-    <div class="stat"><b>NIVEL</b><span id="txt-nivel">1</span></div>
-    <div class="stat"><b>ACIERTOS</b><span id="txt-ok">0</span></div>
-    <div class="stat"><b>VIDAS</b><span id="txt-vidas" style="color:var(--pink)">3</span></div>
+    <div class="stat"><b>Nivel</b><span id="txt-nivel">1</span></div>
+    <div class="stat"><b>Aciertos</b><span id="txt-ok">0</span></div>
+    <div class="stat"><b>Vidas</b><span id="txt-vidas" style="color:var(--pink)">3</span></div>
+    <div class="stat"><b>Reacción</b><span id="txt-speed">0ms</span></div>
 </div>
 
-<div id="game-area">
-    <div id="msg-guia">¡ATENCIÓN!</div>
-    <div class="grid" id="grid-elementos"></div>
-</div>
+<div id="game-area" onclick="failClick()"></div>
 
 <script>
-    // 1. CAPTURAR DATOS DEL PORTAL
     const paciente = localStorage.getItem('paciente') || "Paciente";
-    const profesional = localStorage.getItem('profesional') || "Doc";
-    document.getElementById('msg-bienvenida').innerText = "Hola, " + paciente;
+    const profesional = localStorage.getItem('profesional') || "Especialista";
+    document.getElementById('user-name').innerText = paciente;
 
-    let nivel = 1, vidas = 3, totalAciertos = 0, secuencia = [], secuenciaUsuario = [], mostrando = false;
-    const iconos = ["⭐", "🍎", "🎈", "🚗", "🐶", "🍕", "🚀", "🎸", "💎"];
+    let nivel = 1, totalAciertos = 0, aciertosNivel = 0, vidas = 3, jugando = false, spawnTimer;
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    function playTone(freq) {
+    function playSound(freq) {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
@@ -97,77 +113,87 @@
     function startGame() {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         document.getElementById('screen-start').style.display = 'none';
-        crearTablero();
+        jugando = true;
         iniciarRonda();
     }
 
-    function crearTablero() {
-        const grid = document.getElementById('grid-elementos');
-        grid.innerHTML = "";
-        iconos.forEach((icono, index) => {
-            const tile = document.createElement('div');
-            tile.className = "tile";
-            tile.innerText = icono;
-            tile.onclick = () => manejarClick(index);
-            grid.appendChild(tile);
-        });
-    }
-
     function iniciarRonda() {
-        mostrando = true;
-        secuenciaUsuario = [];
-        document.getElementById('msg-guia').innerText = "¡MIRA!";
+        aciertosNivel = 0;
         document.getElementById('txt-nivel').innerText = nivel;
         document.getElementById('txt-vidas').innerText = vidas;
+        spawnTarget();
+    }
+
+    function spawnTarget() {
+        if(!jugando) return;
+        const area = document.getElementById('game-area');
+        area.innerHTML = "";
         
-        secuencia = [];
-        for(let i=0; i < (1 + nivel); i++) {
-            secuencia.push(Math.floor(Math.random() * 9));
-        }
-        setTimeout(reproducirSecuencia, 800);
-    }
-
-    async function reproducirSecuencia() {
-        const tiles = document.getElementsByClassName('tile');
-        for(let i=0; i < secuencia.length; i++) {
-            await new Promise(r => setTimeout(r, 600));
-            const idx = secuencia[i];
-            tiles[idx].classList.add('active');
-            playTone(400 + (idx * 40));
-            await new Promise(r => setTimeout(r, 400));
-            tiles[idx].classList.remove('active');
-        }
-        mostrando = false;
-        document.getElementById('msg-guia').innerText = "¡REPITE!";
-    }
-
-    function manejarClick(index) {
-        if(mostrando) return;
-        const tiles = document.getElementsByClassName('tile');
-        if(index === secuencia[secuenciaUsuario.length]) {
-            playTone(500 + (index * 40));
-            tiles[index].classList.add('active');
-            setTimeout(() => tiles[index].classList.remove('active'), 200);
-            secuenciaUsuario.push(index);
-            if(secuenciaUsuario.length === secuencia.length) {
-                totalAciertos++;
-                document.getElementById('txt-ok').innerText = totalAciertos;
-                nivel++;
-                setTimeout(iniciarRonda, 1000);
+        const target = document.createElement('div');
+        target.className = "target";
+        const size = Math.max(40, 100 - (nivel * 6));
+        target.style.width = size + "px";
+        target.style.height = size + "px";
+        
+        const x = Math.random() * (window.innerWidth - size - 40);
+        const y = Math.random() * (window.innerHeight - 150 - size);
+        target.style.left = x + "px"; target.style.top = y + "px";
+        
+        const timeLimit = Math.max(600, 2000 - (nivel * 150));
+        
+        target.onclick = (e) => {
+            e.stopPropagation();
+            playSound(600 + (nivel * 50));
+            const reaccion = Date.now() - tiempoAparicion;
+            document.getElementById('txt-speed').innerText = reaccion + "ms";
+            totalAciertos++; aciertosNivel++;
+            document.getElementById('txt-ok').innerText = totalAciertos;
+            
+            clearTimeout(spawnTimer);
+            if(aciertosNivel >= 7) {
+                mostrarPausa();
+            } else {
+                setTimeout(spawnTarget, 500);
             }
-        } else {
-            vidas--;
-            if(vidas <= 0) finalizarJuego();
-            else iniciarRonda();
-        }
+        };
+
+        area.appendChild(target);
+        tiempoAparicion = Date.now();
+        spawnTimer = setTimeout(() => { if(jugando) failClick(); }, timeLimit);
+    }
+
+    function failClick() {
+        if(!jugando) return;
+        vidas--;
+        playSound(200);
+        document.getElementById('txt-vidas').innerText = vidas;
+        document.getElementById('flash').style.animation = "none"; document.getElementById('flash').offsetHeight; 
+        document.getElementById('flash').style.animation = "errorFlash 0.4s";
+        
+        if(vidas <= 0) finalizarJuego();
+        else { clearTimeout(spawnTimer); setTimeout(spawnTarget, 1000); }
+    }
+
+    function mostrarPausa() {
+        jugando = false;
+        document.getElementById('game-area').innerHTML = "";
+        document.getElementById('screen-pause').style.display = 'flex';
+    }
+
+    function continuarSiguienteNivel() {
+        nivel++;
+        document.getElementById('screen-pause').style.display = 'none';
+        jugando = true;
+        iniciarRonda();
     }
 
     function finalizarJuego() {
+        jugando = false;
+        document.getElementById('game-area').innerHTML = "";
         document.getElementById('screen-end').style.display = 'flex';
         enviarDatosFinales();
     }
 
-    // 2. ENVIAR AL EXCEL COMPARTIDO
     function enviarDatosFinales() {
         const formAction = "https://docs.google.com/forms/d/e/1FAIpQLSeLlcvlhrTSHDhvxctLghiM3caGsgBL2wdaT7nBxrz6UARwYg/formResponse";
         const form = document.createElement("form");
@@ -175,12 +201,12 @@
 
         const datos = {
             "entry.369874016": paciente,
-            "entry.1353470174": "Memoria Visual (Prof: " + profesional + ")",
+            "entry.1353470174": "Tiempo de Reacción (Prof: " + profesional + ")",
             "entry.721051298": nivel,
             "entry.873272199": totalAciertos,
-            "entry.1030094511": "N/A",
-            "entry.1303309812": "Finalizado",
-            "entry.845098414": new Date().toISOString().split('T')[0]
+            "entry.1030094511": "Sesión Finalizada",
+            "entry.1303309812": document.getElementById('txt-speed').innerText,
+            "entry.845098414": new Date().toLocaleDateString()
         };
 
         for (let key in datos) {
@@ -193,7 +219,7 @@
         iframe.name = "hidden_iframe"; iframe.style.display = "none";
         document.body.appendChild(iframe); document.body.appendChild(form);
         form.submit();
-        setTimeout(() => { document.getElementById('status-envio').innerText = "✅ DATOS EN EXCEL"; }, 2000);
+        setTimeout(() => { document.getElementById('status-envio').innerText = "✅ REPORTE EN EXCEL"; }, 2000);
     }
 </script>
 </body>
