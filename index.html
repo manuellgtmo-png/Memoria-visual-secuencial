@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memoria Visual PRO - Clínica Visual</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
     <style>
@@ -11,7 +12,6 @@
         }
         body { margin: 0; font-family: 'Montserrat'; background: var(--bg); color: var(--primary); overflow: hidden; height: 100vh; }
         
-        /* Encabezado */
         .header { height: 80px; background: #1e293b; display: flex; justify-content: space-around; align-items: center; border-bottom: 4px solid var(--blue); }
         .stat { text-align: center; }
         .stat b { display: block; color: var(--blue); font-size: 0.7rem; text-transform: uppercase; }
@@ -19,7 +19,6 @@
 
         #game-area { height: calc(100vh - 80px); display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        /* Tablero Dinámico */
         .grid { display: grid; gap: 12px; background: var(--card); padding: 20px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: 0.5s; }
         .grid-3x3 { grid-template-columns: repeat(3, 1fr); }
         .grid-4x4 { grid-template-columns: repeat(4, 1fr); }
@@ -31,7 +30,6 @@
         }
         .tile.active { background: var(--blue); transform: scale(1.05); box-shadow: 0 0 35px var(--blue); border: 3px solid white; }
 
-        /* Pantallas */
         .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.98); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .card { background: #1e293b; border-radius: 40px; padding: 40px; width: 100%; max-width: 450px; text-align: center; border: 1px solid #334155; }
         
@@ -42,7 +40,7 @@
         .btn { background: var(--pink); color: white; padding: 18px; border-radius: 20px; font-weight: 900; border: none; cursor: pointer; width: 100%; font-size: 1.1rem; text-transform: uppercase; box-shadow: 0 6px 0 #9f1239; }
         .btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #9f1239; }
 
-        #msg-guia { font-size: 2.2rem; font-weight: 900; color: var(--blue); margin-bottom: 20px; text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
+        #msg-guia { font-size: 2.2rem; font-weight: 900; color: var(--blue); margin-bottom: 20px; }
         #flash { position: fixed; inset: 0; background: rgba(255, 46, 99, 0.2); pointer-events: none; opacity: 0; z-index: 3000; }
         @keyframes errorFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
     </style>
@@ -56,17 +54,17 @@
         <h1 style="color:var(--blue); margin:0;">Memoria Visual PRO</h1>
         <div class="habilidades">
             <h4>🎯 OBJETIVOS TERAPÉUTICOS:</h4>
-            <p>Trabajaremos tu <b>memoria de trabajo visual</b>, la <b>secuenciación lógica</b> y la <b>atención sostenida</b> bajo condiciones de bajo contraste.</p>
+            <p>Trabajaremos tu <b>memoria de trabajo visual</b>, la <b>secuenciación lógica</b> y la <b>atención sostenida</b>.</p>
         </div>
-        <p style="color:#cbd5e1; font-size: 0.8rem; margin-bottom: 20px;">Tienes 2 vidas. Cada 6 niveles obtendrás una extra.</p>
+        <p style="color:#cbd5e1; font-size: 0.85rem; margin-bottom: 20px;">Fondo oscuro para evitar deslumbramiento. Tienes 2 vidas.</p>
         <button class="btn" onclick="startGame()">Comenzar Entrenamiento</button>
     </div>
 </div>
 
 <div id="screen-pause" class="overlay" style="display:none">
     <div class="card">
-        <h1 id="pause-title" style="color:var(--success)">¡MUY BIEN! 🌟</h1>
-        <p id="pause-msg" style="color:#cbd5e1"></p>
+        <h1 id="pause-title" style="color:var(--success)">¡LOGRADO! 🌟</h1>
+        <p id="pause-msg" style="color:#cbd5e1">Prepárate para el siguiente reto.</p>
         <button class="btn" onclick="continuarSiguienteNivel()" style="background:var(--blue); box-shadow: 0 6px 0 #0369a1;">Siguiente Nivel</button>
     </div>
 </div>
@@ -74,8 +72,8 @@
 <div id="screen-end" class="overlay" style="display:none">
     <div class="card">
         <h1 style="color:var(--pink)">SESIÓN FINALIZADA</h1>
-        <p>Se han agotado las vidas disponibles.</p>
-        <div id="status-envio" style="margin:20px 0; font-weight:900; color:var(--success); font-size: 1.2rem;">🚀 ENVIANDO AL EXCEL...</div>
+        <p>Se han agotado las vidas.</p>
+        <div id="status-envio" style="margin:20px 0; font-weight:900; color:var(--success);">🚀 SINCRONIZANDO EXCEL...</div>
         <button class="btn" onclick="window.location.href='index.html'" style="background:#475569; box-shadow: 0 6px 0 #1e293b;">VOLVER AL MENÚ</button>
     </div>
 </div>
@@ -87,12 +85,12 @@
 </div>
 
 <div id="game-area">
-    <div id="msg-guia">¡PREPARADO!</div>
+    <div id="msg-guia">¡LISTO!</div>
     <div id="grid-elementos" class="grid grid-3x3"></div>
 </div>
 
 <script>
-    const paciente = localStorage.getItem('paciente') || "Paciente";
+    const paciente = localStorage.getItem('paciente') || "Paciente Prueba";
     const profesional = localStorage.getItem('profesional') || "Especialista";
     
     let nivel = 1, totalAciertos = 0, vidas = 2, secuencia = [], secuenciaUsuario = [], mostrando = false, jugando = false;
@@ -122,7 +120,6 @@
         grid.innerHTML = "";
         let cant = (nivel > 6) ? 16 : 9;
         grid.className = (nivel > 6) ? "grid grid-4x4" : "grid grid-3x3";
-
         for(let i=0; i < cant; i++) {
             const tile = document.createElement('div');
             tile.className = "tile";
@@ -151,7 +148,6 @@
     async function reproducirSecuencia() {
         const tiles = document.getElementsByClassName('tile');
         const flashTime = Math.max(200, 600 - (nivel * 30)); 
-        
         for(let i=0; i < secuencia.length; i++) {
             await new Promise(r => setTimeout(r, flashTime + 100));
             const idx = secuencia[i];
@@ -169,18 +165,13 @@
 
     function manejarClick(index) {
         if(mostrando || !jugando) return;
-        const tiles = document.getElementsByClassName('tile');
-        
         if(index === secuencia[secuenciaUsuario.length]) {
             playTone(550 + (index * 20), 0.15);
-            tiles[index].classList.add('active');
-            setTimeout(() => tiles[index].classList.remove('active'), 200);
             secuenciaUsuario.push(index);
-            
             if(secuenciaUsuario.length === secuencia.length) {
                 totalAciertos++;
                 document.getElementById('txt-ok').innerText = totalAciertos;
-                setTimeout(mostrarPausa, 600);
+                setTimeout(mostrarPausa, 500);
             }
         } else {
             vidas--;
@@ -188,39 +179,22 @@
             playTone(140, 0.4);
             document.getElementById('flash').style.animation = "none"; document.getElementById('flash').offsetHeight; 
             document.getElementById('flash').style.animation = "errorFlash 0.5s";
-            
-            if(vidas <= 0) {
-                finalizarJuego();
-            } else {
-                mostrando = true;
-                document.getElementById('msg-guia').innerText = "¡ERROR!";
-                setTimeout(iniciarRonda, 1200);
-            }
+            if(vidas <= 0) finalizarJuego();
+            else { mostrando = true; setTimeout(iniciarRonda, 1200); }
         }
     }
 
     function mostrarPausa() {
         jugando = false;
-        let msg = "¡Excelente secuencia! Prepárate para subir la dificultad.";
-        
         if(nivel % 6 === 0) {
             vidas++;
-            document.getElementById('txt-vidas').innerText = vidas;
             document.getElementById('pause-title').innerText = "¡BONUS DE VIDA! ❤️";
-            msg = "Has ganado una vida extra por superar el nivel " + nivel + ".";
-        } else {
-            document.getElementById('pause-title').innerText = "¡NIVEL " + nivel + " COMPLETADO!";
         }
-
-        if(nivel === 6) msg = "¡Atención! En el siguiente nivel el tablero crecerá a 4x4.";
-        
-        document.getElementById('pause-msg').innerText = msg;
         document.getElementById('screen-pause').style.display = 'flex';
     }
 
     function continuarSiguienteNivel() {
         nivel++;
-        document.getElementById('txt-nivel').innerText = nivel;
         document.getElementById('screen-pause').style.display = 'none';
         jugando = true;
         actualizarTablero();
@@ -234,38 +208,33 @@
     }
 
     function enviarDatosFinales() {
-        const formAction = "https://docs.google.com/forms/d/e/1FAIpQLSeLlcvlhrTSHDhvxctLghiM3caGsgBL2wdaT7nBxrz6UARwYg/formResponse";
-        const form = document.createElement("form");
-        form.method = "POST"; form.action = formAction; form.target = "hidden_iframe";
-
-        const datos = {
-            "entry.369874016": paciente,
-            "entry.1353470174": "Memoria Visual PRO (Fondo Oscuro)",
-            "entry.721051298": nivel,
-            "entry.873272199": totalAciertos,
-            "entry.1030094511": "Profesional: " + profesional,
-            "entry.1303309812": "N/A",
-            "entry.845098414": new Date().toLocaleDateString()
-        };
-
-        for (let key in datos) {
-            const input = document.createElement("input");
-            input.type = "hidden"; input.name = key; input.value = datos[key];
-            form.appendChild(input);
-        }
-
-        const iframe = document.createElement("iframe");
-        iframe.name = "hidden_iframe"; iframe.style.display = "none";
-        document.body.appendChild(iframe); document.body.appendChild(form);
-        form.submit();
+        const url = "https://docs.google.com/forms/d/e/1FAIpQLSeLlcvlhrTSHDhvxctLghiM3caGsgBL2wdaT7nBxrz6UARwYg/formResponse";
         
-        setTimeout(() => { 
-            document.getElementById('status-envio').innerText = "✅ DATOS SINCRONIZADOS";
-        }, 3000);
+        // Usamos URLSearchParams que es más compatible con Google Forms
+        const params = new URLSearchParams();
+        params.append("entry.369874016", paciente);
+        params.append("entry.1353470174", "Memoria Visual Secuencial (Fondo Oscuro)");
+        params.append("entry.721051298", nivel);
+        params.append("entry.873272199", totalAciertos);
+        params.append("entry.1030094511", "Prof: " + profesional);
+        params.append("entry.1303309812", "N/A");
+        params.append("entry.845098414", new Date().toLocaleDateString());
+
+        fetch(url, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: params.toString()
+        }).then(() => {
+            document.getElementById('status-envio').innerText = "✅ DATOS GUARDADOS EN EXCEL";
+        }).catch(() => {
+            document.getElementById('status-envio').innerText = "❌ ERROR DE CONEXIÓN";
+        });
     }
 </script>
 </body>
 </html>
+
 
 
 
