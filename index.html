@@ -12,6 +12,7 @@
         }
         body { margin: 0; font-family: 'Montserrat'; background: var(--bg); color: var(--primary); overflow: hidden; height: 100vh; }
         
+        /* Encabezado */
         .header { height: 80px; background: #1e293b; display: flex; justify-content: space-around; align-items: center; border-bottom: 4px solid var(--blue); }
         .stat { text-align: center; }
         .stat b { display: block; color: var(--blue); font-size: 0.7rem; text-transform: uppercase; }
@@ -19,17 +20,34 @@
 
         #game-area { height: calc(100vh - 80px); display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        .grid { display: grid; gap: 12px; background: var(--card); padding: 20px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .grid-3x3 { grid-template-columns: repeat(3, 1fr); }
-        .grid-4x4 { grid-template-columns: repeat(4, 1fr); }
+        /* Tablero */
+        .grid { display: grid; gap: 15px; background: var(--card); padding: 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .grid-3x3 { grid-template-columns: repeat(3, 100px); }
+        .grid-4x4 { grid-template-columns: repeat(4, 85px); }
 
         .tile { 
-            width: 85px; height: 85px; background: #334155; border-radius: 18px; 
-            display: flex; align-items: center; justify-content: center; font-size: 2.2rem;
-            cursor: pointer; border: none; transition: 0.2s; user-select: none;
+            width: 100%; height: 100px; background: #334155; border-radius: 20px; 
+            display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
+            cursor: pointer; border: none; transition: 0.2s; user-select: none; box-shadow: 0 6px 0 #0f172a;
         }
-        .tile.active { background: var(--blue); transform: scale(1.05); box-shadow: 0 0 35px var(--blue); border: 3px solid white; }
+        .grid-4x4 .tile { height: 85px; }
 
+        /* Efectos de Iluminación */
+        .tile.active { background: var(--blue); transform: scale(1.1); box-shadow: 0 0 40px var(--blue); border: 3px solid white; z-index: 10; }
+        .tile.correct { background: var(--success); transform: scale(1.05); box-shadow: 0 0 20px var(--success); }
+        .tile.wrong { background: var(--pink); animation: shake 0.3s; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        /* Textos e Instrucciones */
+        #msg-guia { font-size: 2.5rem; font-weight: 900; color: var(--blue); margin-bottom: 5px; text-transform: uppercase; }
+        #sub-guia { color: #94a3b8; font-size: 1rem; margin-bottom: 25px; }
+
+        /* Pantallas Overlays */
         .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.98); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .card { background: #1e293b; border-radius: 40px; padding: 40px; width: 100%; max-width: 450px; text-align: center; border: 1px solid #334155; }
         
@@ -37,195 +55,187 @@
         .habilidades h4 { margin: 0 0 5px 0; color: var(--pink); font-size: 0.85rem; text-transform: uppercase; }
         .habilidades p { margin: 0; font-size: 0.85rem; color: #cbd5e1; line-height: 1.4; }
 
-        .btn { background: var(--pink); color: white; padding: 18px; border-radius: 20px; font-weight: 900; border: none; cursor: pointer; width: 100%; font-size: 1.1rem; text-transform: uppercase; box-shadow: 0 6px 0 #9f1239; }
-        #msg-guia { font-size: 2.2rem; font-weight: 900; color: var(--blue); margin-bottom: 20px; }
+        .btn { background: var(--pink); color: white; padding: 20px; border-radius: 22px; font-weight: 900; border: none; cursor: pointer; width: 100%; font-size: 1.2rem; text-transform: uppercase; box-shadow: 0 8px 0 #9f1239; }
     </style>
 </head>
 <body>
 
 <div id="screen-start" class="overlay">
     <div class="card">
-        <h1 style="color:var(--blue); margin:0;">Memoria Visual PRO</h1>
+        <h1 style="color:var(--blue); margin:0;">Memoria Visual</h1>
         <div class="habilidades">
             <h4>🎯 OBJETIVOS TERAPÉUTICOS:</h4>
-            <p>Trabajaremos tu <b>memoria de trabajo visual</b>, la <b>secuenciación lógica</b> y la <b>atención sostenida</b>.</p>
+            <p>Trabajaremos la <b>memoria de trabajo visual</b>, la <b>secuenciación lógica</b> y la <b>atención sostenida</b> bajo condiciones de bajo contraste.</p>
         </div>
-        <button class="btn" onclick="startGame()">Comenzar Entrenamiento</button>
-    </div>
-</div>
-
-<div id="screen-pause" class="overlay" style="display:none">
-    <div class="card">
-        <h1 id="pause-title" style="color:var(--success)">¡BIEN HECHO!</h1>
-        <p id="pause-msg" style="color:#cbd5e1"></p>
-        <button class="btn" onclick="continuarSiguienteNivel()" style="background:var(--blue); box-shadow: 0 6px 0 #0369a1;">Siguiente Nivel</button>
+        <p style="color:#cbd5e1; font-size: 0.9rem; margin-bottom: 20px;">Observa la secuencia y repítela. Tienes 2 vidas.</p>
+        <button class="btn" onclick="iniciarJuego()">COMENZAR</button>
     </div>
 </div>
 
 <div id="screen-end" class="overlay" style="display:none">
     <div class="card">
-        <h1 style="color:var(--pink)">FIN DE SESIÓN</h1>
-        <p>Resultados enviados al historial.</p>
-        <div id="status-envio" style="margin:20px 0; font-weight:900; color:var(--success);">🚀 SINCRONIZANDO...</div>
-        <button class="btn" onclick="window.location.href='index.html'" style="background:#475569; box-shadow: 0 6px 0 #1e293b;">VOLVER AL MENÚ</button>
+        <h1 style="color:var(--pink)">SESIÓN TERMINADA</h1>
+        <p id="envio-status">Enviando resultados al Excel...</p>
+        <button class="btn" onclick="location.reload()" style="background:#475569; box-shadow: 0 8px 0 #1e293b;">REPETIR EJERCICIO</button>
     </div>
 </div>
 
 <div class="header">
-    <div class="stat"><b>Nivel</b><span id="txt-nivel">1</span></div>
+    <div class="stat"><b>Nivel Máximo</b><span id="txt-nivel">1</span></div>
     <div class="stat"><b>Aciertos</b><span id="txt-ok">0</span></div>
     <div class="stat"><b>Vidas</b><span id="txt-vidas" style="color:var(--pink)">2</span></div>
 </div>
 
 <div id="game-area">
-    <div id="msg-guia">¡PREPARADO!</div>
-    <div id="grid-elementos" class="grid grid-3x3"></div>
+    <div id="msg-guia">¡LISTO!</div>
+    <div id="sub-guia">Atención a la secuencia...</div>
+    <div id="tablero" class="grid grid-3x3"></div>
 </div>
 
-<iframe name="v_iframe" id="v_iframe" style="display:none;"></iframe>
+<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
 
 <script>
-    const paciente = localStorage.getItem('paciente') || "Paciente Sin Nombre";
-    const profesional = localStorage.getItem('profesional') || "Especialista";
-    
-    let nivel = 1, totalAciertos = 0, vidas = 2, secuencia = [], secuenciaUsuario = [], mostrando = false, jugando = false;
-    const iconos = ["⭐", "🍎", "🎈", "🚗", "🐶", "🍕", "🚀", "🎸", "💎", "🌈", "☀", "🍀", "👾", "🏀", "🍦", "🛸"];
-
-    function startGame() {
-        document.getElementById('screen-start').style.display = 'none';
-        jugando = true;
-        actualizarTablero();
-        iniciarRonda();
+    // --- Sistema de Audio ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function sonar(f, d, t='sine') {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + d);
     }
 
-    function actualizarTablero() {
-        const grid = document.getElementById('grid-elementos');
-        grid.innerHTML = "";
+    // --- Lógica del Juego ---
+    const iconos = ["⭐", "🍎", "🎈", "🚗", "🐶", "🍕", "🚀", "🎸", "💎", "🌈", "☀", "🍀", "👾", "🏀", "🍦", "🛸"];
+    let nivel = 1, aciertos = 0, vidas = 2, secuencia = [], userSeq = [], bloqueado = true;
+    const paciente = localStorage.getItem('paciente') || "Paciente";
+    const profesional = localStorage.getItem('profesional') || "Especialista";
+
+    function iniciarJuego() {
+        document.getElementById('screen-start').style.display = 'none';
+        crearTablero();
+        nuevaRonda();
+    }
+
+    function crearTablero() {
+        const t = document.getElementById('tablero');
+        t.innerHTML = "";
         let cant = (nivel > 6) ? 16 : 9;
-        grid.className = (nivel > 6) ? "grid grid-4x4" : "grid grid-3x3";
-        for(let i=0; i < cant; i++) {
-            const tile = document.createElement('div');
-            tile.className = "tile";
-            tile.innerText = iconos[i];
-            tile.onclick = () => manejarClick(i);
-            grid.appendChild(tile);
+        t.className = (nivel > 6) ? "grid grid-4x4" : "grid grid-3x3";
+        for(let i=0; i<cant; i++) {
+            let div = document.createElement('div');
+            div.className = "tile"; div.innerText = iconos[i];
+            div.onclick = () => procesarClick(i, div);
+            t.appendChild(div);
         }
     }
 
-    function iniciarRonda() {
-        if(!jugando) return;
-        mostrando = true;
-        secuenciaUsuario = [];
+    async function nuevaRonda() {
+        bloqueado = true;
+        userSeq = [];
         document.getElementById('msg-guia').innerText = "¡MIRA!";
-        document.getElementById('txt-vidas').innerText = vidas;
+        document.getElementById('sub-guia').innerText = "Memoriza el orden...";
         
         secuencia = [];
-        const largo = 2 + Math.floor(nivel * 0.75); 
-        let cantFiguras = (nivel > 6) ? 16 : 9;
-        for(let i=0; i < largo; i++) secuencia.push(Math.floor(Math.random() * cantFiguras));
-        
-        setTimeout(reproducirSecuencia, 800);
-    }
+        let largo = 2 + Math.floor(nivel * 0.6);
+        let max = (nivel > 6) ? 16 : 9;
+        for(let i=0; i<largo; i++) secuencia.push(Math.floor(Math.random()*max));
 
-    async function reproducirSecuencia() {
         const tiles = document.getElementsByClassName('tile');
-        const flashTime = Math.max(200, 500 - (nivel * 20)); 
-        for(let i=0; i < secuencia.length; i++) {
-            await new Promise(r => setTimeout(r, flashTime + 150));
-            const idx = secuencia[i];
+        for(let idx of secuencia) {
+            await new Promise(r => setTimeout(r, 600));
             if(tiles[idx]) {
                 tiles[idx].classList.add('active');
-                await new Promise(r => setTimeout(r, flashTime));
+                sonar(440, 0.2);
+                await new Promise(r => setTimeout(r, 500));
                 tiles[idx].classList.remove('active');
             }
         }
-        mostrando = false;
+        
+        bloqueado = false;
         document.getElementById('msg-guia').innerText = "¡REPITE!";
+        document.getElementById('sub-guia').innerText = "Toca las figuras en orden.";
     }
 
-    function manejarClick(index) {
-        if(mostrando || !jugando) return;
-        if(index === secuencia[secuenciaUsuario.length]) {
-            secuenciaUsuario.push(index);
-            if(secuenciaUsuario.length === secuencia.length) {
-                totalAciertos++;
-                document.getElementById('txt-ok').innerText = totalAciertos;
-                setTimeout(mostrarPausa, 500);
+    function procesarClick(id, el) {
+        if(bloqueado) return;
+        if(id === secuencia[userSeq.length]) {
+            sonar(600, 0.1);
+            el.classList.add('correct');
+            setTimeout(() => el.classList.remove('correct'), 200);
+            userSeq.push(id);
+            if(userSeq.length === secuencia.length) {
+                aciertos++; nivel++;
+                if(nivel % 6 === 0) vidas++;
+                actualizarStats();
+                bloqueado = true;
+                setTimeout(() => {
+                    crearTablero();
+                    nuevaRonda();
+                }, 800);
             }
         } else {
             vidas--;
-            document.getElementById('txt-vidas').innerText = vidas;
+            sonar(150, 0.4, 'sawtooth');
+            el.classList.add('wrong');
+            actualizarStats();
             if(vidas <= 0) {
-                finalizarJuego();
+                finalizar();
             } else {
-                mostrando = true;
-                document.getElementById('msg-guia').innerText = "¡ERROR!";
-                setTimeout(iniciarRonda, 1000);
+                bloqueado = true;
+                setTimeout(() => {
+                    el.classList.remove('wrong');
+                    nuevaRonda();
+                }, 1000);
             }
         }
     }
 
-    function mostrarPausa() {
-        jugando = false;
-        if(nivel % 6 === 0) {
-            vidas++;
-            document.getElementById('pause-title').innerText = "¡BONUS VIDA! ❤️";
-        } else {
-            document.getElementById('pause-title').innerText = "¡NIVEL " + nivel + " OK!";
-        }
-        document.getElementById('screen-pause').style.display = 'flex';
-    }
-
-    function continuarSiguienteNivel() {
-        nivel++;
+    function actualizarStats() {
         document.getElementById('txt-nivel').innerText = nivel;
-        document.getElementById('screen-pause').style.display = 'none';
-        jugando = true;
-        actualizarTablero();
-        iniciarRonda();
+        document.getElementById('txt-ok').innerText = aciertos;
+        document.getElementById('txt-vidas').innerText = vidas;
     }
 
-    function finalizarJuego() {
-        jugando = false;
+    function finalizar() {
+        bloqueado = true;
         document.getElementById('screen-end').style.display = 'flex';
-        enviarDatosFinales();
+        enviarExcel();
     }
 
-    function enviarDatosFinales() {
-        // FORMULARIO DINÁMICO PARA ASEGURAR ENVÍO
+    function enviarExcel() {
         const form = document.createElement("form");
-        form.method = "POST";
+        form.method = "POST"; form.target = "hidden_iframe";
         form.action = "https://docs.google.com/forms/d/e/1FAIpQLSeLlcvlhrTSHDhvxctLghiM3caGsgBL2wdaT7nBxrz6UARwYg/formResponse";
-        form.target = "v_iframe"; // Esto evita que la página se recargue
 
-        const campos = {
+        const datos = {
             "entry.369874016": paciente,
-            "entry.1353470174": "Memoria Visual Secuencial (Fondo Oscuro)",
+            "entry.1353470174": "Memoria Visual Secuencial",
             "entry.721051298": nivel,
-            "entry.873272199": totalAciertos,
-            "entry.1030094511": "Especialista: " + profesional,
-            "entry.1303309812": "N/A",
+            "entry.873272199": aciertos,
+            "entry.1030094511": profesional,
             "entry.845098414": new Date().toLocaleDateString()
         };
 
-        for (let name in campos) {
-            const input = document.createElement("input");
-            input.type = "hidden";
-            input.name = name;
-            input.value = campos[name];
-            form.appendChild(input);
+        for(let key in datos) {
+            let inp = document.createElement("input");
+            inp.type="hidden"; inp.name=key; inp.value=datos[key];
+            form.appendChild(inp);
         }
-
         document.body.appendChild(form);
-        form.submit(); // Disparo del envío
-
-        setTimeout(() => {
-            document.getElementById('status-envio').innerText = "✅ SINCRONIZADO CON EXCEL";
+        form.submit();
+        
+        setTimeout(() => { 
+            document.getElementById('envio-status').innerText = "✅ DATOS SINCRONIZADOS";
+            document.getElementById('envio-status').style.color = "#10b981";
         }, 2000);
     }
 </script>
 </body>
 </html>
+
 
 
 
