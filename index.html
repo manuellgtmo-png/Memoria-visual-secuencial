@@ -19,14 +19,14 @@
 
         #game-area { height: calc(100vh - 80px); display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        .grid { display: grid; gap: 12px; background: var(--card); padding: 20px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: 0.5s; }
+        .grid { display: grid; gap: 12px; background: var(--card); padding: 20px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .grid-3x3 { grid-template-columns: repeat(3, 1fr); }
         .grid-4x4 { grid-template-columns: repeat(4, 1fr); }
 
         .tile { 
             width: 85px; height: 85px; background: #334155; border-radius: 18px; 
             display: flex; align-items: center; justify-content: center; font-size: 2.2rem;
-            cursor: pointer; border: none; transition: 0.2s; user-select: none; box-shadow: 0 5px 0 #0f172a;
+            cursor: pointer; border: none; transition: 0.2s; user-select: none;
         }
         .tile.active { background: var(--blue); transform: scale(1.05); box-shadow: 0 0 35px var(--blue); border: 3px solid white; }
 
@@ -38,16 +38,10 @@
         .habilidades p { margin: 0; font-size: 0.85rem; color: #cbd5e1; line-height: 1.4; }
 
         .btn { background: var(--pink); color: white; padding: 18px; border-radius: 20px; font-weight: 900; border: none; cursor: pointer; width: 100%; font-size: 1.1rem; text-transform: uppercase; box-shadow: 0 6px 0 #9f1239; }
-        .btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #9f1239; }
-
         #msg-guia { font-size: 2.2rem; font-weight: 900; color: var(--blue); margin-bottom: 20px; }
-        #flash { position: fixed; inset: 0; background: rgba(255, 46, 99, 0.2); pointer-events: none; opacity: 0; z-index: 3000; }
-        @keyframes errorFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
     </style>
 </head>
 <body>
-
-<div id="flash"></div>
 
 <div id="screen-start" class="overlay">
     <div class="card">
@@ -56,24 +50,23 @@
             <h4>🎯 OBJETIVOS TERAPÉUTICOS:</h4>
             <p>Trabajaremos tu <b>memoria de trabajo visual</b>, la <b>secuenciación lógica</b> y la <b>atención sostenida</b>.</p>
         </div>
-        <p style="color:#cbd5e1; font-size: 0.85rem; margin-bottom: 20px;">Fondo oscuro para evitar deslumbramiento. Tienes 2 vidas.</p>
         <button class="btn" onclick="startGame()">Comenzar Entrenamiento</button>
     </div>
 </div>
 
 <div id="screen-pause" class="overlay" style="display:none">
     <div class="card">
-        <h1 id="pause-title" style="color:var(--success)">¡LOGRADO! 🌟</h1>
-        <p id="pause-msg" style="color:#cbd5e1">Prepárate para el siguiente reto.</p>
+        <h1 id="pause-title" style="color:var(--success)">¡BIEN HECHO!</h1>
+        <p id="pause-msg" style="color:#cbd5e1"></p>
         <button class="btn" onclick="continuarSiguienteNivel()" style="background:var(--blue); box-shadow: 0 6px 0 #0369a1;">Siguiente Nivel</button>
     </div>
 </div>
 
 <div id="screen-end" class="overlay" style="display:none">
     <div class="card">
-        <h1 style="color:var(--pink)">SESIÓN FINALIZADA</h1>
-        <p>Se han agotado las vidas.</p>
-        <div id="status-envio" style="margin:20px 0; font-weight:900; color:var(--success);">🚀 SINCRONIZANDO EXCEL...</div>
+        <h1 style="color:var(--pink)">FIN DE SESIÓN</h1>
+        <p>Resultados enviados al historial.</p>
+        <div id="status-envio" style="margin:20px 0; font-weight:900; color:var(--success);">🚀 SINCRONIZANDO...</div>
         <button class="btn" onclick="window.location.href='index.html'" style="background:#475569; box-shadow: 0 6px 0 #1e293b;">VOLVER AL MENÚ</button>
     </div>
 </div>
@@ -85,28 +78,18 @@
 </div>
 
 <div id="game-area">
-    <div id="msg-guia">¡LISTO!</div>
+    <div id="msg-guia">¡PREPARADO!</div>
     <div id="grid-elementos" class="grid grid-3x3"></div>
 </div>
 
+<iframe name="v_iframe" id="v_iframe" style="display:none;"></iframe>
+
 <script>
-    const paciente = localStorage.getItem('paciente') || "Paciente Prueba";
+    const paciente = localStorage.getItem('paciente') || "Paciente Sin Nombre";
     const profesional = localStorage.getItem('profesional') || "Especialista";
     
     let nivel = 1, totalAciertos = 0, vidas = 2, secuencia = [], secuenciaUsuario = [], mostrando = false, jugando = false;
     const iconos = ["⭐", "🍎", "🎈", "🚗", "🐶", "🍕", "🚀", "🎸", "💎", "🌈", "☀", "🍀", "👾", "🏀", "🍦", "🛸"];
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    function playTone(freq, dur=0.3) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
-        osc.start(); osc.stop(audioCtx.currentTime + dur);
-    }
 
     function startGame() {
         document.getElementById('screen-start').style.display = 'none';
@@ -134,7 +117,6 @@
         mostrando = true;
         secuenciaUsuario = [];
         document.getElementById('msg-guia').innerText = "¡MIRA!";
-        document.getElementById('msg-guia').style.color = "var(--pink)";
         document.getElementById('txt-vidas').innerText = vidas;
         
         secuencia = [];
@@ -142,31 +124,28 @@
         let cantFiguras = (nivel > 6) ? 16 : 9;
         for(let i=0; i < largo; i++) secuencia.push(Math.floor(Math.random() * cantFiguras));
         
-        setTimeout(reproducirSecuencia, 1000);
+        setTimeout(reproducirSecuencia, 800);
     }
 
     async function reproducirSecuencia() {
         const tiles = document.getElementsByClassName('tile');
-        const flashTime = Math.max(200, 600 - (nivel * 30)); 
+        const flashTime = Math.max(200, 500 - (nivel * 20)); 
         for(let i=0; i < secuencia.length; i++) {
-            await new Promise(r => setTimeout(r, flashTime + 100));
+            await new Promise(r => setTimeout(r, flashTime + 150));
             const idx = secuencia[i];
             if(tiles[idx]) {
                 tiles[idx].classList.add('active');
-                playTone(400 + (idx * 30));
                 await new Promise(r => setTimeout(r, flashTime));
                 tiles[idx].classList.remove('active');
             }
         }
         mostrando = false;
         document.getElementById('msg-guia').innerText = "¡REPITE!";
-        document.getElementById('msg-guia').style.color = "var(--blue)";
     }
 
     function manejarClick(index) {
         if(mostrando || !jugando) return;
         if(index === secuencia[secuenciaUsuario.length]) {
-            playTone(550 + (index * 20), 0.15);
             secuenciaUsuario.push(index);
             if(secuenciaUsuario.length === secuencia.length) {
                 totalAciertos++;
@@ -176,11 +155,13 @@
         } else {
             vidas--;
             document.getElementById('txt-vidas').innerText = vidas;
-            playTone(140, 0.4);
-            document.getElementById('flash').style.animation = "none"; document.getElementById('flash').offsetHeight; 
-            document.getElementById('flash').style.animation = "errorFlash 0.5s";
-            if(vidas <= 0) finalizarJuego();
-            else { mostrando = true; setTimeout(iniciarRonda, 1200); }
+            if(vidas <= 0) {
+                finalizarJuego();
+            } else {
+                mostrando = true;
+                document.getElementById('msg-guia').innerText = "¡ERROR!";
+                setTimeout(iniciarRonda, 1000);
+            }
         }
     }
 
@@ -188,13 +169,16 @@
         jugando = false;
         if(nivel % 6 === 0) {
             vidas++;
-            document.getElementById('pause-title').innerText = "¡BONUS DE VIDA! ❤️";
+            document.getElementById('pause-title').innerText = "¡BONUS VIDA! ❤️";
+        } else {
+            document.getElementById('pause-title').innerText = "¡NIVEL " + nivel + " OK!";
         }
         document.getElementById('screen-pause').style.display = 'flex';
     }
 
     function continuarSiguienteNivel() {
         nivel++;
+        document.getElementById('txt-nivel').innerText = nivel;
         document.getElementById('screen-pause').style.display = 'none';
         jugando = true;
         actualizarTablero();
@@ -208,32 +192,41 @@
     }
 
     function enviarDatosFinales() {
-        const url = "https://docs.google.com/forms/d/e/1FAIpQLSeLlcvlhrTSHDhvxctLghiM3caGsgBL2wdaT7nBxrz6UARwYg/formResponse";
-        
-        // Usamos URLSearchParams que es más compatible con Google Forms
-        const params = new URLSearchParams();
-        params.append("entry.369874016", paciente);
-        params.append("entry.1353470174", "Memoria Visual Secuencial (Fondo Oscuro)");
-        params.append("entry.721051298", nivel);
-        params.append("entry.873272199", totalAciertos);
-        params.append("entry.1030094511", "Prof: " + profesional);
-        params.append("entry.1303309812", "N/A");
-        params.append("entry.845098414", new Date().toLocaleDateString());
+        // FORMULARIO DINÁMICO PARA ASEGURAR ENVÍO
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "https://docs.google.com/forms/d/e/1FAIpQLSeLlcvlhrTSHDhvxctLghiM3caGsgBL2wdaT7nBxrz6UARwYg/formResponse";
+        form.target = "v_iframe"; // Esto evita que la página se recargue
 
-        fetch(url, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: params.toString()
-        }).then(() => {
-            document.getElementById('status-envio').innerText = "✅ DATOS GUARDADOS EN EXCEL";
-        }).catch(() => {
-            document.getElementById('status-envio').innerText = "❌ ERROR DE CONEXIÓN";
-        });
+        const campos = {
+            "entry.369874016": paciente,
+            "entry.1353470174": "Memoria Visual Secuencial (Fondo Oscuro)",
+            "entry.721051298": nivel,
+            "entry.873272199": totalAciertos,
+            "entry.1030094511": "Especialista: " + profesional,
+            "entry.1303309812": "N/A",
+            "entry.845098414": new Date().toLocaleDateString()
+        };
+
+        for (let name in campos) {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = name;
+            input.value = campos[name];
+            form.appendChild(input);
+        }
+
+        document.body.appendChild(form);
+        form.submit(); // Disparo del envío
+
+        setTimeout(() => {
+            document.getElementById('status-envio').innerText = "✅ SINCRONIZADO CON EXCEL";
+        }, 2000);
     }
 </script>
 </body>
 </html>
+
 
 
 
