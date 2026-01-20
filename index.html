@@ -12,7 +12,6 @@
         }
         body { margin: 0; font-family: 'Montserrat'; background: var(--bg); color: var(--primary); overflow: hidden; height: 100vh; }
         
-        /* Header con estilo */
         .header { height: 80px; background: #1e293b; display: flex; justify-content: space-around; align-items: center; border-bottom: 4px solid var(--blue); }
         .stat { text-align: center; }
         .stat b { display: block; color: var(--blue); font-size: 0.7rem; text-transform: uppercase; }
@@ -20,7 +19,6 @@
 
         #game-area { height: calc(100vh - 80px); display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        /* Grilla Dinámica */
         .grid { display: grid; gap: 15px; background: var(--card); padding: 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .grid-3x3 { grid-template-columns: repeat(3, 100px); }
         .grid-4x4 { grid-template-columns: repeat(4, 85px); }
@@ -30,60 +28,72 @@
             display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
             cursor: pointer; border: none; transition: 0.2s; user-select: none; box-shadow: 0 6px 0 #0f172a;
         }
-        .grid-4x4 .tile { height: 85px; }
+        .grid-4x4 .tile { height: 85px; font-size: 2.2rem; }
 
-        /* Efectos Visuales Alegres */
         .tile.active { background: var(--yellow); transform: scale(1.1); box-shadow: 0 0 40px var(--yellow); border: 3px solid white; z-index: 10; }
-        .tile.correct { background: var(--success); transform: scale(1.05); box-shadow: 0 0 20px var(--success); }
+        .tile.correct { background: var(--success); transform: scale(1.05); }
         .tile.wrong { background: var(--pink); animation: shake 0.3s; }
 
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
 
-        #msg-guia { font-size: 2.5rem; font-weight: 900; color: var(--blue); margin-bottom: 5px; text-transform: uppercase; text-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
+        #msg-guia { font-size: 2.5rem; font-weight: 900; color: var(--blue); margin-bottom: 5px; text-transform: uppercase; }
         
-        /* Ventanas Flotantes */
         .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.98); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .card { background: #1e293b; border-radius: 40px; padding: 40px; width: 100%; max-width: 450px; text-align: center; border: 1px solid #334155; }
         
         .habilidades { text-align: left; background: #334155; padding: 20px; border-radius: 20px; margin: 20px 0; border-left: 5px solid var(--yellow); }
-        .habilidades h4 { margin: 0 0 5px 0; color: var(--yellow); font-size: 0.85rem; letter-spacing: 1px; }
-        .habilidades p { margin: 0; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; }
+        .habilidades h4 { margin: 0 0 5px 0; color: var(--yellow); font-size: 0.85rem; }
+        .habilidades p { margin: 0; font-size: 0.85rem; color: #cbd5e1; }
 
-        .btn { background: var(--pink); color: white; padding: 20px; border-radius: 22px; font-weight: 900; border: none; cursor: pointer; width: 100%; font-size: 1.2rem; text-transform: uppercase; box-shadow: 0 8px 0 #9f1239; transition: 0.2s; }
-        .btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #9f1239; }
+        .btn { background: var(--pink); color: white; padding: 20px; border-radius: 22px; font-weight: 900; border: none; cursor: pointer; width: 100%; font-size: 1.2rem; text-transform: uppercase; box-shadow: 0 8px 0 #9f1239; }
         .btn-next { background: var(--success); box-shadow: 0 8px 0 #065f46; }
+
+        .demo-box { width: 40px; height: 40px; background: var(--yellow); border-radius: 8px; display: inline-block; animation: pulse 1.5s infinite; vertical-align: middle; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     </style>
 </head>
 <body>
 
 <div id="screen-start" class="overlay">
     <div class="card">
-        <h1 style="color:var(--yellow); margin:0; font-size: 3rem;">¡HOLA! ✨</h1>
-        <h2 style="margin-top:0; color:white;">Memoria Visual</h2>
+        <h1 style="color:var(--yellow); margin:0; font-size: 2.5rem;">¡HOLA! ✨</h1>
+        <h2 id="saludo-paciente" style="margin-top:0; color:white;">Memoria Visual</h2>
         <div class="habilidades">
             <h4>🎯 OBJETIVOS DE HOY:</h4>
-            <p>• Fortalecer la <b>memoria de trabajo</b>.<br>• Mejorar la <b>secuenciación lógica</b>.<br>• Entrenar la <b>atención sostenida</b>.</p>
+            <p>• Fortalecer la memoria de trabajo.<br>• Mejorar la secuenciación lógica.<br>• Entrenar la atención sostenida.</p>
         </div>
-        <p style="color:#cbd5e1; margin-bottom: 25px;">¿Listos para entrenar tu cerebro? Tienes 2 vidas para llegar lo más lejos posible.</p>
-        <button class="btn" onclick="iniciarJuego()">¡SÍ, EMPEZAR!</button>
+        <button class="btn" onclick="mostrarInstruccion()">¡EMPEZAR ENTRENAMIENTO!</button>
+    </div>
+</div>
+
+<div id="screen-instruccion" class="overlay" style="display:none">
+    <div class="card">
+        <h2 style="color:var(--blue);">¿CÓMO JUGAR?</h2>
+        <div style="text-align: left; color: #cbd5e1; font-size: 0.95rem; line-height: 1.6;">
+            <p>1. Mira los cuadros que brillan <span class="demo-box"></span>.</p>
+            <p>2. Memoriza el <b>orden exacto</b>.</p>
+            <p>3. Toca las figuras en ese mismo orden.</p>
+            <p style="color: var(--pink);">❤️ Tienes 2 vidas. ¡Llega lo más lejos posible!</p>
+        </div>
+        <button class="btn" onclick="iniciarJuego()" style="margin-top:20px; background: var(--blue); box-shadow: 0 8px 0 #0369a1;">¡ENTENDIDO!</button>
     </div>
 </div>
 
 <div id="screen-next" class="overlay" style="display:none">
     <div class="card">
-        <h1 style="color:var(--success); font-size: 3rem;">¡BIEN! 🌟</h1>
-        <p id="msg-next" style="font-size: 1.2rem; color: white;">Nivel superado con éxito.</p>
-        <div style="margin: 25px 0; color: #94a3b8; font-size: 0.9rem;">Tómate un segundo para parpadear y descansar.</div>
-        <button class="btn btn-next" onclick="irASiguienteNivel()">SIGUIENTE NIVEL</button>
+        <h1 style="color:var(--success)">¡EXCELENTE! 🌟</h1>
+        <p style="font-size: 1.2rem;">Nivel superado.</p>
+        <p style="color: #94a3b8;">Parpadea y descansa un momento.</p>
+        <button class="btn btn-next" onclick="irASiguienteNivel()">CONTINUAR</button>
     </div>
 </div>
 
 <div id="screen-end" class="overlay" style="display:none">
     <div class="card">
-        <h1 style="color:var(--pink)">¡BUEN TRABAJO!</h1>
-        <p id="final-stats" style="font-size: 1.1rem; color: white;"></p>
-        <div id="envio-status" style="margin:20px 0; font-weight:900; color:var(--blue); letter-spacing: 1px;">🚀 SINCRONIZANDO EXCEL...</div>
-        <button class="btn" onclick="location.reload()" style="background:#475569; box-shadow: 0 8px 0 #1e293b;">VOLVER A INTENTAR</button>
+        <h1 style="color:var(--pink)">SESIÓN TERMINADA</h1>
+        <p id="resumen-final" style="font-size: 1.1rem;"></p>
+        <div id="envio-status" style="margin:20px 0; font-weight:900; color:var(--blue);">🚀 SINCRONIZANDO CON EXCEL...</div>
+        <button class="btn" onclick="location.href='index.html'" style="background:#475569; box-shadow: 0 8px 0 #1e293b;">VOLVER AL MENÚ</button>
     </div>
 </div>
 
@@ -94,14 +104,18 @@
 </div>
 
 <div id="game-area">
-    <div id="msg-guia">¡PREPARADO!</div>
+    <div id="msg-guia">¡LISTO!</div>
     <div id="tablero" class="grid grid-3x3"></div>
 </div>
 
-<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+<iframe name="target_frame" id="target_frame" style="display:none;"></iframe>
 
 <script>
-    // Audio Context
+    // --- INTEGRACIÓN PANEL ADMINISTRATIVO ---
+    const nombrePaciente = localStorage.getItem('paciente') || "Paciente";
+    const nombreEspecialista = localStorage.getItem('profesional') || "Especialista";
+    document.getElementById('saludo-paciente').innerText = "¡Hola, " + nombrePaciente + "!";
+
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function sonar(f, d, t='sine') {
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -115,12 +129,14 @@
 
     const iconos = ["⭐", "🍎", "🎈", "🚗", "🐶", "🍕", "🚀", "🎸", "💎", "🌈", "☀", "🍀", "👾", "🏀", "🍦", "🛸"];
     let nivel = 1, aciertos = 0, vidas = 2, secuencia = [], userSeq = [], bloqueado = true;
-    
-    const paciente = localStorage.getItem('paciente') || "Paciente";
-    const profesional = localStorage.getItem('profesional') || "Especialista";
+
+    function mostrarInstruccion() {
+        document.getElementById('screen-start').style.display = 'none';
+        document.getElementById('screen-instruccion').style.display = 'flex';
+    }
 
     function iniciarJuego() {
-        document.getElementById('screen-start').style.display = 'none';
+        document.getElementById('screen-instruccion').style.display = 'none';
         cargarTablero();
     }
 
@@ -160,7 +176,7 @@
             }
         }
         bloqueado = false;
-        document.getElementById('msg-guia').innerText = "¡REPITE!";
+        document.getElementById('msg-guia').innerText = "¡TU TURNO!";
     }
 
     function manejarClick(id, el) {
@@ -174,18 +190,15 @@
                 aciertos++;
                 document.getElementById('txt-ok').innerText = aciertos;
                 bloqueado = true;
-                setTimeout(() => {
-                    document.getElementById('screen-next').style.display = 'flex';
-                }, 500);
+                setTimeout(() => { document.getElementById('screen-next').style.display = 'flex'; }, 500);
             }
         } else {
             vidas--;
             document.getElementById('txt-vidas').innerText = vidas;
             sonar(150, 0.4, 'sawtooth');
             el.classList.add('wrong');
-            if(vidas <= 0) {
-                finalizarSesion();
-            } else {
+            if(vidas <= 0) finalizarSesion();
+            else {
                 bloqueado = true;
                 setTimeout(() => { el.classList.remove('wrong'); nuevaRonda(); }, 1000);
             }
@@ -194,39 +207,36 @@
 
     function irASiguienteNivel() {
         nivel++;
-        if(nivel % 6 === 0) vidas++;
+        if(nivel % 6 === 0) { vidas++; document.getElementById('txt-vidas').innerText = vidas; }
         document.getElementById('screen-next').style.display = 'none';
         cargarTablero();
     }
 
     function finalizarSesion() {
         bloqueado = true;
-        document.getElementById('final-stats').innerText = `Llegaste al Nivel ${nivel} con ${aciertos} aciertos totales.`;
+        document.getElementById('resumen-final').innerText = nombrePaciente + ", llegaste al Nivel " + nivel;
         document.getElementById('screen-end').style.display = 'flex';
-        enviarAGoogleSheets();
+        enviarExcel();
     }
 
-    function enviarAGoogleSheets() {
-        const url = "https://docs.google.com/forms/d/e/1FAIpQLSeLlcvlhrTSHDhvxctLghiM3caGsgBL2wdaT7nBxrz6UARwYg/formResponse";
+    function enviarExcel() {
         const form = document.createElement("form");
         form.method = "POST";
-        form.action = url;
-        form.target = "hidden_iframe";
+        form.action = "https://docs.google.com/forms/d/e/1FAIpQLSeLlcvlhrTSHDhvxctLghiM3caGsgBL2wdaT7nBxrz6UARwYg/formResponse";
+        form.target = "target_frame";
 
         const datos = {
-            "entry.369874016": paciente,
+            "entry.369874016": nombrePaciente,
             "entry.1353470174": "Memoria Visual Secuencial",
             "entry.721051298": nivel,
             "entry.873272199": aciertos,
-            "entry.1030094511": profesional,
+            "entry.1030094511": nombreEspecialista,
             "entry.845098414": new Date().toLocaleDateString()
         };
 
         for (let key in datos) {
             let input = document.createElement("input");
-            input.type = "hidden";
-            input.name = key;
-            input.value = datos[key];
+            input.type = "hidden"; input.name = key; input.value = datos[key];
             form.appendChild(input);
         }
 
@@ -234,13 +244,14 @@
         form.submit();
 
         setTimeout(() => {
-            document.getElementById('envio-status').innerText = "✅ ¡EXCEL ACTUALIZADO!";
+            document.getElementById('envio-status').innerText = "✅ DATOS GUARDADOS";
             document.getElementById('envio-status').style.color = "#10b981";
         }, 2500);
     }
 </script>
 </body>
 </html>
+
 
 
 
