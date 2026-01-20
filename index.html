@@ -12,6 +12,7 @@
         }
         body { margin: 0; font-family: 'Montserrat'; background: var(--bg); color: var(--primary); overflow: hidden; height: 100vh; }
         
+        /* Header */
         .header { height: 80px; background: #1e293b; display: flex; justify-content: space-around; align-items: center; border-bottom: 4px solid var(--blue); }
         .stat { text-align: center; }
         .stat b { display: block; color: var(--blue); font-size: 0.7rem; text-transform: uppercase; }
@@ -19,6 +20,7 @@
 
         #game-area { height: calc(100vh - 80px); display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
+        /* Tablero */
         .grid { display: grid; gap: 15px; background: var(--card); padding: 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .grid-3x3 { grid-template-columns: repeat(3, 100px); }
         .grid-4x4 { grid-template-columns: repeat(4, 85px); }
@@ -62,7 +64,7 @@
             <h4>🎯 OBJETIVOS DE HOY:</h4>
             <p>• Fortalecer la memoria de trabajo.<br>• Mejorar la secuenciación lógica.<br>• Entrenar la atención sostenida.</p>
         </div>
-        <button class="btn" onclick="mostrarInstruccion()">¡EMPEZAR ENTRENAMIENTO!</button>
+        <button class="btn" onclick="mostrarInstruccion()">¡EMPEZAR!</button>
     </div>
 </div>
 
@@ -83,7 +85,6 @@
     <div class="card">
         <h1 style="color:var(--success)">¡EXCELENTE! 🌟</h1>
         <p style="font-size: 1.2rem;">Nivel superado.</p>
-        <p style="color: #94a3b8;">Parpadea y descansa un momento.</p>
         <button class="btn btn-next" onclick="irASiguienteNivel()">CONTINUAR</button>
     </div>
 </div>
@@ -92,8 +93,8 @@
     <div class="card">
         <h1 style="color:var(--pink)">SESIÓN TERMINADA</h1>
         <p id="resumen-final" style="font-size: 1.1rem;"></p>
-        <div id="envio-status" style="margin:20px 0; font-weight:900; color:var(--blue);">🚀 SINCRONIZANDO CON EXCEL...</div>
-        <button class="btn" onclick="location.href='index.html'" style="background:#475569; box-shadow: 0 8px 0 #1e293b;">VOLVER AL MENÚ</button>
+        <div id="envio-status" style="margin:20px 0; font-weight:900; color:var(--blue);">🚀 ACTUALIZANDO EXCEL...</div>
+        <button class="btn" onclick="location.reload()" style="background:#475569; box-shadow: 0 8px 0 #1e293b;">REPETIR</button>
     </div>
 </div>
 
@@ -111,8 +112,7 @@
 <iframe name="target_frame" id="target_frame" style="display:none;"></iframe>
 
 <script>
-    // --- INTEGRACIÓN PANEL ADMINISTRATIVO ---
-    const nombrePaciente = localStorage.getItem('paciente') || "Paciente";
+    const nombrePaciente = localStorage.getItem('paciente') || "Paciente Prueba";
     const nombreEspecialista = localStorage.getItem('profesional') || "Especialista";
     document.getElementById('saludo-paciente').innerText = "¡Hola, " + nombrePaciente + "!";
 
@@ -128,7 +128,8 @@
     }
 
     const iconos = ["⭐", "🍎", "🎈", "🚗", "🐶", "🍕", "🚀", "🎸", "💎", "🌈", "☀", "🍀", "👾", "🏀", "🍦", "🛸"];
-    let nivel = 1, aciertos = 0, vidas = 2, secuencia = [], userSeq = [], bloqueado = true;
+    let nivel = 1, aciertos = 0, fallos = 0, vidas = 2, secuencia = [], userSeq = [], bloqueado = true;
+    let startTime = Date.now();
 
     function mostrarInstruccion() {
         document.getElementById('screen-start').style.display = 'none';
@@ -194,6 +195,7 @@
             }
         } else {
             vidas--;
+            fallos++; // Ahora contamos fallos para la columna del Excel
             document.getElementById('txt-vidas').innerText = vidas;
             sonar(150, 0.4, 'sawtooth');
             el.classList.add('wrong');
@@ -214,24 +216,26 @@
 
     function finalizarSesion() {
         bloqueado = true;
-        document.getElementById('resumen-final').innerText = nombrePaciente + ", llegaste al Nivel " + nivel;
+        document.getElementById('resumen-final').innerText = "Llegaste al Nivel " + nivel;
         document.getElementById('screen-end').style.display = 'flex';
         enviarExcel();
     }
 
     function enviarExcel() {
+        const url = "https://docs.google.com/forms/d/e/1FAIpQLSeLlcvlhrTSHDhvxctLghiM3caGsgBL2wdaT7nBxrz6UARwYg/formResponse";
         const form = document.createElement("form");
         form.method = "POST";
-        form.action = "https://docs.google.com/forms/d/e/1FAIpQLSeLlcvlhrTSHDhvxctLghiM3caGsgBL2wdaT7nBxrz6UARwYg/formResponse";
+        form.action = url;
         form.target = "target_frame";
 
+        // Mapeo exacto según las columnas de tu imagen
         const datos = {
             "entry.369874016": nombrePaciente,
-            "entry.1353470174": "Memoria Visual Secuencial",
+            "entry.1353470174": "Memoria Visual (" + nombreEspecialista + ")",
             "entry.721051298": nivel,
             "entry.873272199": aciertos,
-            "entry.1030094511": nombreEspecialista,
-            "entry.845098414": new Date().toLocaleDateString()
+            "entry.1030094511": fallos, // Columna 'Fallos' en el Excel
+            "entry.845098414": ((Date.now() - startTime)/1000).toFixed(1) + "s" // Columna 'Tiempo'
         };
 
         for (let key in datos) {
