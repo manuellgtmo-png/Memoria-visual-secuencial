@@ -8,11 +8,11 @@
     <style>
         :root { 
             --bg: #0f172a; --primary: #f8fafc; --pink: #ff2e63; 
-            --blue: #38bdf8; --card: #1e293b; --success: #10b981;
+            --blue: #38bdf8; --card: #1e293b; --success: #10b981; --yellow: #facc15;
         }
         body { margin: 0; font-family: 'Montserrat'; background: var(--bg); color: var(--primary); overflow: hidden; height: 100vh; }
         
-        /* Encabezado */
+        /* Header con estilo */
         .header { height: 80px; background: #1e293b; display: flex; justify-content: space-around; align-items: center; border-bottom: 4px solid var(--blue); }
         .stat { text-align: center; }
         .stat b { display: block; color: var(--blue); font-size: 0.7rem; text-transform: uppercase; }
@@ -20,7 +20,7 @@
 
         #game-area { height: calc(100vh - 80px); display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        /* Tablero */
+        /* Grilla Dinámica */
         .grid { display: grid; gap: 15px; background: var(--card); padding: 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .grid-3x3 { grid-template-columns: repeat(3, 100px); }
         .grid-4x4 { grid-template-columns: repeat(4, 85px); }
@@ -32,70 +32,76 @@
         }
         .grid-4x4 .tile { height: 85px; }
 
-        /* Efectos de Iluminación */
-        .tile.active { background: var(--blue); transform: scale(1.1); box-shadow: 0 0 40px var(--blue); border: 3px solid white; z-index: 10; }
+        /* Efectos Visuales Alegres */
+        .tile.active { background: var(--yellow); transform: scale(1.1); box-shadow: 0 0 40px var(--yellow); border: 3px solid white; z-index: 10; }
         .tile.correct { background: var(--success); transform: scale(1.05); box-shadow: 0 0 20px var(--success); }
         .tile.wrong { background: var(--pink); animation: shake 0.3s; }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            75% { transform: translateX(8px); }
-        }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
 
-        /* Textos e Instrucciones */
-        #msg-guia { font-size: 2.5rem; font-weight: 900; color: var(--blue); margin-bottom: 5px; text-transform: uppercase; }
-        #sub-guia { color: #94a3b8; font-size: 1rem; margin-bottom: 25px; }
-
-        /* Pantallas Overlays */
+        #msg-guia { font-size: 2.5rem; font-weight: 900; color: var(--blue); margin-bottom: 5px; text-transform: uppercase; text-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
+        
+        /* Ventanas Flotantes */
         .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.98); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .card { background: #1e293b; border-radius: 40px; padding: 40px; width: 100%; max-width: 450px; text-align: center; border: 1px solid #334155; }
         
-        .habilidades { text-align: left; background: #334155; padding: 20px; border-radius: 20px; margin: 20px 0; border-left: 5px solid var(--pink); }
-        .habilidades h4 { margin: 0 0 5px 0; color: var(--pink); font-size: 0.85rem; text-transform: uppercase; }
-        .habilidades p { margin: 0; font-size: 0.85rem; color: #cbd5e1; line-height: 1.4; }
+        .habilidades { text-align: left; background: #334155; padding: 20px; border-radius: 20px; margin: 20px 0; border-left: 5px solid var(--yellow); }
+        .habilidades h4 { margin: 0 0 5px 0; color: var(--yellow); font-size: 0.85rem; letter-spacing: 1px; }
+        .habilidades p { margin: 0; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; }
 
-        .btn { background: var(--pink); color: white; padding: 20px; border-radius: 22px; font-weight: 900; border: none; cursor: pointer; width: 100%; font-size: 1.2rem; text-transform: uppercase; box-shadow: 0 8px 0 #9f1239; }
+        .btn { background: var(--pink); color: white; padding: 20px; border-radius: 22px; font-weight: 900; border: none; cursor: pointer; width: 100%; font-size: 1.2rem; text-transform: uppercase; box-shadow: 0 8px 0 #9f1239; transition: 0.2s; }
+        .btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #9f1239; }
+        .btn-next { background: var(--success); box-shadow: 0 8px 0 #065f46; }
     </style>
 </head>
 <body>
 
 <div id="screen-start" class="overlay">
     <div class="card">
-        <h1 style="color:var(--blue); margin:0;">Memoria Visual</h1>
+        <h1 style="color:var(--yellow); margin:0; font-size: 3rem;">¡HOLA! ✨</h1>
+        <h2 style="margin-top:0; color:white;">Memoria Visual</h2>
         <div class="habilidades">
-            <h4>🎯 OBJETIVOS TERAPÉUTICOS:</h4>
-            <p>Trabajaremos la <b>memoria de trabajo visual</b>, la <b>secuenciación lógica</b> y la <b>atención sostenida</b> bajo condiciones de bajo contraste.</p>
+            <h4>🎯 OBJETIVOS DE HOY:</h4>
+            <p>• Fortalecer la <b>memoria de trabajo</b>.<br>• Mejorar la <b>secuenciación lógica</b>.<br>• Entrenar la <b>atención sostenida</b>.</p>
         </div>
-        <p style="color:#cbd5e1; font-size: 0.9rem; margin-bottom: 20px;">Observa la secuencia y repítela. Tienes 2 vidas.</p>
-        <button class="btn" onclick="iniciarJuego()">COMENZAR</button>
+        <p style="color:#cbd5e1; margin-bottom: 25px;">¿Listos para entrenar tu cerebro? Tienes 2 vidas para llegar lo más lejos posible.</p>
+        <button class="btn" onclick="iniciarJuego()">¡SÍ, EMPEZAR!</button>
+    </div>
+</div>
+
+<div id="screen-next" class="overlay" style="display:none">
+    <div class="card">
+        <h1 style="color:var(--success); font-size: 3rem;">¡BIEN! 🌟</h1>
+        <p id="msg-next" style="font-size: 1.2rem; color: white;">Nivel superado con éxito.</p>
+        <div style="margin: 25px 0; color: #94a3b8; font-size: 0.9rem;">Tómate un segundo para parpadear y descansar.</div>
+        <button class="btn btn-next" onclick="irASiguienteNivel()">SIGUIENTE NIVEL</button>
     </div>
 </div>
 
 <div id="screen-end" class="overlay" style="display:none">
     <div class="card">
-        <h1 style="color:var(--pink)">SESIÓN TERMINADA</h1>
-        <p id="envio-status">Enviando resultados al Excel...</p>
-        <button class="btn" onclick="location.reload()" style="background:#475569; box-shadow: 0 8px 0 #1e293b;">REPETIR EJERCICIO</button>
+        <h1 style="color:var(--pink)">¡BUEN TRABAJO!</h1>
+        <p id="final-stats" style="font-size: 1.1rem; color: white;"></p>
+        <div id="envio-status" style="margin:20px 0; font-weight:900; color:var(--blue); letter-spacing: 1px;">🚀 SINCRONIZANDO EXCEL...</div>
+        <button class="btn" onclick="location.reload()" style="background:#475569; box-shadow: 0 8px 0 #1e293b;">VOLVER A INTENTAR</button>
     </div>
 </div>
 
 <div class="header">
-    <div class="stat"><b>Nivel Máximo</b><span id="txt-nivel">1</span></div>
+    <div class="stat"><b>Nivel</b><span id="txt-nivel">1</span></div>
     <div class="stat"><b>Aciertos</b><span id="txt-ok">0</span></div>
     <div class="stat"><b>Vidas</b><span id="txt-vidas" style="color:var(--pink)">2</span></div>
 </div>
 
 <div id="game-area">
-    <div id="msg-guia">¡LISTO!</div>
-    <div id="sub-guia">Atención a la secuencia...</div>
+    <div id="msg-guia">¡PREPARADO!</div>
     <div id="tablero" class="grid grid-3x3"></div>
 </div>
 
 <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
 
 <script>
-    // --- Sistema de Audio ---
+    // Audio Context
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function sonar(f, d, t='sine') {
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -107,19 +113,19 @@
         o.start(); o.stop(audioCtx.currentTime + d);
     }
 
-    // --- Lógica del Juego ---
     const iconos = ["⭐", "🍎", "🎈", "🚗", "🐶", "🍕", "🚀", "🎸", "💎", "🌈", "☀", "🍀", "👾", "🏀", "🍦", "🛸"];
     let nivel = 1, aciertos = 0, vidas = 2, secuencia = [], userSeq = [], bloqueado = true;
+    
     const paciente = localStorage.getItem('paciente') || "Paciente";
     const profesional = localStorage.getItem('profesional') || "Especialista";
 
     function iniciarJuego() {
         document.getElementById('screen-start').style.display = 'none';
-        crearTablero();
-        nuevaRonda();
+        cargarTablero();
     }
 
-    function crearTablero() {
+    function cargarTablero() {
+        document.getElementById('txt-nivel').innerText = nivel;
         const t = document.getElementById('tablero');
         t.innerHTML = "";
         let cant = (nivel > 6) ? 16 : 9;
@@ -127,16 +133,16 @@
         for(let i=0; i<cant; i++) {
             let div = document.createElement('div');
             div.className = "tile"; div.innerText = iconos[i];
-            div.onclick = () => procesarClick(i, div);
+            div.onclick = () => manejarClick(i, div);
             t.appendChild(div);
         }
+        setTimeout(nuevaRonda, 800);
     }
 
     async function nuevaRonda() {
         bloqueado = true;
         userSeq = [];
         document.getElementById('msg-guia').innerText = "¡MIRA!";
-        document.getElementById('sub-guia').innerText = "Memoriza el orden...";
         
         secuencia = [];
         let largo = 2 + Math.floor(nivel * 0.6);
@@ -153,13 +159,11 @@
                 tiles[idx].classList.remove('active');
             }
         }
-        
         bloqueado = false;
         document.getElementById('msg-guia').innerText = "¡REPITE!";
-        document.getElementById('sub-guia').innerText = "Toca las figuras en orden.";
     }
 
-    function procesarClick(id, el) {
+    function manejarClick(id, el) {
         if(bloqueado) return;
         if(id === secuencia[userSeq.length]) {
             sonar(600, 0.1);
@@ -167,48 +171,47 @@
             setTimeout(() => el.classList.remove('correct'), 200);
             userSeq.push(id);
             if(userSeq.length === secuencia.length) {
-                aciertos++; nivel++;
-                if(nivel % 6 === 0) vidas++;
-                actualizarStats();
+                aciertos++;
+                document.getElementById('txt-ok').innerText = aciertos;
                 bloqueado = true;
                 setTimeout(() => {
-                    crearTablero();
-                    nuevaRonda();
-                }, 800);
+                    document.getElementById('screen-next').style.display = 'flex';
+                }, 500);
             }
         } else {
             vidas--;
+            document.getElementById('txt-vidas').innerText = vidas;
             sonar(150, 0.4, 'sawtooth');
             el.classList.add('wrong');
-            actualizarStats();
             if(vidas <= 0) {
-                finalizar();
+                finalizarSesion();
             } else {
                 bloqueado = true;
-                setTimeout(() => {
-                    el.classList.remove('wrong');
-                    nuevaRonda();
-                }, 1000);
+                setTimeout(() => { el.classList.remove('wrong'); nuevaRonda(); }, 1000);
             }
         }
     }
 
-    function actualizarStats() {
-        document.getElementById('txt-nivel').innerText = nivel;
-        document.getElementById('txt-ok').innerText = aciertos;
-        document.getElementById('txt-vidas').innerText = vidas;
+    function irASiguienteNivel() {
+        nivel++;
+        if(nivel % 6 === 0) vidas++;
+        document.getElementById('screen-next').style.display = 'none';
+        cargarTablero();
     }
 
-    function finalizar() {
+    function finalizarSesion() {
         bloqueado = true;
+        document.getElementById('final-stats').innerText = `Llegaste al Nivel ${nivel} con ${aciertos} aciertos totales.`;
         document.getElementById('screen-end').style.display = 'flex';
-        enviarExcel();
+        enviarAGoogleSheets();
     }
 
-    function enviarExcel() {
+    function enviarAGoogleSheets() {
+        const url = "https://docs.google.com/forms/d/e/1FAIpQLSeLlcvlhrTSHDhvxctLghiM3caGsgBL2wdaT7nBxrz6UARwYg/formResponse";
         const form = document.createElement("form");
-        form.method = "POST"; form.target = "hidden_iframe";
-        form.action = "https://docs.google.com/forms/d/e/1FAIpQLSeLlcvlhrTSHDhvxctLghiM3caGsgBL2wdaT7nBxrz6UARwYg/formResponse";
+        form.method = "POST";
+        form.action = url;
+        form.target = "hidden_iframe";
 
         const datos = {
             "entry.369874016": paciente,
@@ -219,22 +222,26 @@
             "entry.845098414": new Date().toLocaleDateString()
         };
 
-        for(let key in datos) {
-            let inp = document.createElement("input");
-            inp.type="hidden"; inp.name=key; inp.value=datos[key];
-            form.appendChild(inp);
+        for (let key in datos) {
+            let input = document.createElement("input");
+            input.type = "hidden";
+            input.name = key;
+            input.value = datos[key];
+            form.appendChild(input);
         }
+
         document.body.appendChild(form);
         form.submit();
-        
-        setTimeout(() => { 
-            document.getElementById('envio-status').innerText = "✅ DATOS SINCRONIZADOS";
+
+        setTimeout(() => {
+            document.getElementById('envio-status').innerText = "✅ ¡EXCEL ACTUALIZADO!";
             document.getElementById('envio-status').style.color = "#10b981";
-        }, 2000);
+        }, 2500);
     }
 </script>
 </body>
 </html>
+
 
 
 
